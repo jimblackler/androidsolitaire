@@ -3,10 +3,10 @@
 #include "GlUtils.h"
 
 #include <EGL/egl.h>
-#include <cstdlib>
+
+#include <malloc.h>
 
 #include "glm/glm.hpp"
-#include "Textures.h"
 
 auto gVertexShader = R"(#version 300 es
 
@@ -49,22 +49,22 @@ auto gFragmentShader = R"(#version 300 es
 )";
 
 static const GLfloat gVertexBufferData[] = {
-    -1.0f, 1.0f, 0.0f,
-    1.0f, 1.0f, 0.0f,
-    -1.0f, -1.0f, 0.0f,
-    1.0f, -1.0f, 0.0f,
+    -1.0F, 1.0F, 0.0F,
+    1.0F, 1.0F, 0.0F,
+    -1.0F, -1.0F, 0.0F,
+    1.0F, -1.0F, 0.0F,
 };
 
 static const GLfloat gUvBufferData[] = {
-    0.0f, 0.0f,
-    1.0f, 0.0f,
-    0.0f, 1.0f,
-    1.0f, 1.0f
+    0.0F, 0.0F,
+    1.0F, 0.0F,
+    0.0F, 1.0F,
+    1.0F, 1.0F
 };
 
 class LocalRenderer : public Renderer {
 
-  const EGLContext eglContext;
+  EGLContext eglContext;
   GLuint vertexBuffer;
   GLuint uvBuffer;
   GLuint program;
@@ -79,24 +79,22 @@ class LocalRenderer : public Renderer {
   }
 
   void render(int counter) override {
-    glClearColor(.3, .3, .3, 1.0f);
+    glClearColor(0.3F, 0.3F, 0.3F, 1.0F);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
     glUseProgram(program);
 
-    glm::mat4 mvp = glm::mat4(1.0f);
+    glm::mat4 mvp = glm::mat4(1.0F);
     glUniformMatrix4fv(matrixId, 1, GL_FALSE, &mvp[0][0]);
 
-    if (true) {
-      glBindTexture(GL_TEXTURE_2D, texture);
-      jclass glServiceType = env->GetObjectClass(glService);
-      jmethodID methodId = env->GetMethodID(glServiceType, "loadTexture", "(Ljava/lang/String;)V");
-      char *outString;
-      asprintf(&outString, "#%d", counter);
-      jstring string = env->NewStringUTF(outString);
-      env->CallVoidMethod(glService, methodId, string);
-      free(outString);
-    }
+    glBindTexture(GL_TEXTURE_2D, texture);
+    jclass glServiceType = env->GetObjectClass(glService);
+    jmethodID methodId = env->GetMethodID(glServiceType, "loadTexture", "()V");
+    char *outString;
+    asprintf(&outString, "#%d", counter);
+    jstring string = env->NewStringUTF(outString);
+    env->CallVoidMethod(glService, methodId, string);
+    free(outString);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);
@@ -117,23 +115,9 @@ class LocalRenderer : public Renderer {
 
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);
-
-    if (false) {
-      size_t size = 1000000;
-      void *data = malloc(size);
-      if (data) {
-        char *ptr = (char *) data;
-        for (int count = 0; count < size; count++) {
-          *ptr++ = 0x7f;
-        }
-      } else {
-        __android_log_write(ANDROID_LOG_INFO, "Renderer", "failed");
-      }
-    }
   }
 
-
-  bool init(JNIEnv *env, jobject glService, const jint *data, jint width, jint height) override {
+  bool init(JNIEnv *env, jobject glService) override {
     this->env = env;
     this->glService = env->NewGlobalRef(glService);
     GLuint vertexArrayID;
@@ -151,12 +135,6 @@ class LocalRenderer : public Renderer {
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
 
-    if (true) {
-      auto data2 = GenerateTexture(width, height);
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data2);
-    } else {
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-    }
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 

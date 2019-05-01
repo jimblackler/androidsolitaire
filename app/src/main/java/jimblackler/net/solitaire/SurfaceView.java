@@ -1,13 +1,10 @@
 package jimblackler.net.solitaire;
 
-import static jimblackler.net.solitaire.GlConstants.glConstant;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.opengl.GLSurfaceView;
-import android.util.Log;
 import java.util.ArrayList;
 import java.util.List;
 import javax.microedition.khronos.egl.EGLConfig;
@@ -53,41 +50,8 @@ class SurfaceView extends GLSurfaceView {
       MainLib.resize(width, height);
     }
 
-
     public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-      Bitmap texture;
-      if (false) {
-        texture = Textures.textAsBitmap("Hello", 240, Color.MAGENTA);
-      } else {
-        texture = BitmapFactory.decodeResource(context.getResources(), R.drawable.apple_webp);
-      }
-      int[] pixels = GlUtils.getTextureData(texture);
-      MainLib.init(new GlService(context, gl), pixels, texture.getWidth(), texture.getHeight());
-
-      int[] results = new int[20];
-      gl.glGetIntegerv(gl.GL_NUM_COMPRESSED_TEXTURE_FORMATS, results, 0);
-      int numFormats = results[0];
-      results = new int[numFormats];
-
-      gl.glGetIntegerv(gl.GL_COMPRESSED_TEXTURE_FORMATS, results, 0);
-      for (int i = 0; i < numFormats; i++) {
-        Log.i(TAG, "GL_COMPRESSED_TEXTURE_FORMATS: " + Integer.toHexString(results[i]) + " " +
-            glConstant(results[i]));
-      }
-
-      // Detect capabilities.
-      String s = gl.glGetString(gl.GL_EXTENSIONS);
-      if (s.contains("GL_IMG_texture_compression_pvrtc")) {
-        Log.i(TAG, "Use PVR compressed textures");
-      } else if (s.contains("GL_AMD_compressed_ATC_texture") ||
-          s.contains("GL_ATI_texture_compression_atitc")) {
-        Log.i(TAG, "Load ATI Textures");
-      } else if (s.contains("GL_OES_texture_compression_S3TC") ||
-          s.contains("GL_EXT_texture_compression_s3tc")) {
-        Log.i(TAG, "Use DTX Textures");
-      } else {
-        Log.i(TAG, "Handle no texture compression founded.");
-      }
+      MainLib.init(new GlService(context, gl));
     }
   }
 }

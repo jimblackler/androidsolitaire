@@ -2,21 +2,19 @@
 
 #include <jni.h>
 #include <cstdlib>
-#include <cstring>
 #include <ctime>
 #include <EGL/egl.h>
+#include <string.h>
 
 #include "Controller.h"
 #include "Renderer.h"
-
 
 static Controller *gController = nullptr;
 static Renderer *gRenderer = nullptr;
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_jimblackler_net_solitaire_MainLib_init(JNIEnv *env, jclass type, jobject glService,
-                                             jintArray pixels, jint width, jint height) {
+Java_jimblackler_net_solitaire_MainLib_init(JNIEnv *env, jclass type, jobject glService) {
     if (gRenderer) {
         delete gRenderer;
         gRenderer = nullptr;
@@ -25,8 +23,7 @@ Java_jimblackler_net_solitaire_MainLib_init(JNIEnv *env, jclass type, jobject gl
     auto versionStr = (const char *) glGetString(GL_VERSION);
     if (strstr(versionStr, "OpenGL ES 3.")) {
         gRenderer = newRenderer();
-        const jint *data = env->GetIntArrayElements(pixels, nullptr);
-        gRenderer->init(env, glService, data, width, height);
+        gRenderer->init(env, glService);
     } else {
         ALOGE("Unsupported OpenGL ES version");
     }

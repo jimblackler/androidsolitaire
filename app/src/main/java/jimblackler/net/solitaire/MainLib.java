@@ -6,7 +6,7 @@ class MainLib {
     System.loadLibrary("native-lib");
   }
 
-  public static native void init(GlService glService, int[] pixels, int width, int height);
+  public static native void init(GlService glService);
 
   public static native void resize(int width, int height);
 
