@@ -1,8 +1,8 @@
 #include "Renderer.h"
 #include "GlUtils.h"
 #include <EGL/egl.h>
-#include <malloc.h>
 #include "glm/glm.hpp"
+#include "glm/gtx/transform.hpp"
 
 auto gVertexShader = R"(#version 300 es
 
@@ -80,6 +80,8 @@ class LocalRenderer : public Renderer {
     glUseProgram(program);
 
     glm::mat4 mvp = glm::mat4();
+    mvp = glm::scale(mvp, glm::vec3(0.5F, 0.5F, 0));
+    mvp = glm::translate(mvp, glm::vec3(0.5F, 0.5F, 0));
     glUniformMatrix4fv(matrixId, 1, GL_FALSE, &mvp[0][0]);
 
     glBindTexture(GL_TEXTURE_2D, texture);
