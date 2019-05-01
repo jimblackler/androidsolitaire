@@ -91,11 +91,7 @@ class LocalRenderer : public Renderer {
     glBindTexture(GL_TEXTURE_2D, texture);
     jclass glServiceType = env->GetObjectClass(glService);
     jmethodID methodId = env->GetMethodID(glServiceType, "loadTexture", "()V");
-    char *outString;
-    asprintf(&outString, "#%d", counter);
-    jstring string = env->NewStringUTF(outString);
-    env->CallVoidMethod(glService, methodId, string);
-    free(outString);
+    env->CallVoidMethod(glService, methodId);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);
