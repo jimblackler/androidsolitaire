@@ -9,10 +9,12 @@ class LocalController : public Controller {
     renderer->render(timeCount);
     timeCount++;
   }
+
 public:
   LocalController() {
     timeCount = 0;
   }
+
   ~LocalController() override = default;
 };
 
