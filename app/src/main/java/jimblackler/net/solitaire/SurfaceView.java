@@ -1,13 +1,8 @@
 package jimblackler.net.solitaire;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.opengl.GLSurfaceView;
 
-import java.util.ArrayList;
-import java.util.List;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
@@ -27,23 +22,13 @@ class SurfaceView extends GLSurfaceView {
 
   private static class Renderer implements GLSurfaceView.Renderer {
 
-    List<byte[]> bytes = new ArrayList<byte[]>();
     private final Context context;
 
-    public Renderer(Context context) {
+    Renderer(Context context) {
       this.context = context;
     }
 
     public void onDrawFrame(GL10 gl) {
-      if (false) {
-        try {
-          int size = 1000000;
-          byte[] data = new byte[size];
-          bytes.add(data);
-        } catch (OutOfMemoryError ignored) {
-
-        }
-      }
       MainLib.step();
     }
 
