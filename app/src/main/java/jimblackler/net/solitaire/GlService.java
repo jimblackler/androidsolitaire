@@ -18,6 +18,6 @@ class GlService {
 
   void loadTexture() throws IOException {
     GLUtils.texImage2D(gl.GL_TEXTURE_2D, 0,
-        BitmapFactory.decodeResource(context.getResources(), R.drawable.apple_webp), 0);
+        BitmapFactory.decodeResource(context.getResources(), R.drawable.cards103x143), 0);
   }
 }

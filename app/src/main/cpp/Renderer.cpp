@@ -79,7 +79,8 @@ class LocalRenderer : public Renderer {
   }
 
   void render(int counter) override {
-    glClearColor(0.3F, 0.3F, 0.3F, 1.0F);
+    glClearColor(0.25F, 0.75F, 0.25F, 1.0F);
+
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
     glUseProgram(program);
