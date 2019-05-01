@@ -1,11 +1,7 @@
 #include "Renderer.h"
-
 #include "GlUtils.h"
-
 #include <EGL/egl.h>
-
 #include <malloc.h>
-
 #include "glm/glm.hpp"
 
 auto gVertexShader = R"(#version 300 es
@@ -21,12 +17,11 @@ auto gVertexShader = R"(#version 300 es
   uniform mat4 MVP;
 
   void main(){
+    // Output position of the vertex, in clip space : MVP * position
+    gl_Position =  MVP * vec4(vertexPosition_modelspace,1);
 
-      // Output position of the vertex, in clip space : MVP * position
-      gl_Position =  MVP * vec4(vertexPosition_modelspace,1);
-
-      // UV of the vertex. No special space for this one.
-      UV = vertexUV;
+    // UV of the vertex. No special space for this one.
+    UV = vertexUV;
   }
 )";
 
@@ -42,9 +37,8 @@ auto gFragmentShader = R"(#version 300 es
   uniform sampler2D textureSampler;
 
   void main(){
-
-      // Output color = color of the texture at the specified UV
-      color = texture(textureSampler, UV).rgba;
+    // Output color = color of the texture at the specified UV
+    color = texture(textureSampler, UV).rgba;
   }
 )";
 
