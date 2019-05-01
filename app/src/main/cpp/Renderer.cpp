@@ -79,7 +79,7 @@ class LocalRenderer : public Renderer {
 
     glUseProgram(program);
 
-    glm::mat4 mvp = glm::mat4(1.0F);
+    glm::mat4 mvp = glm::mat4();
     glUniformMatrix4fv(matrixId, 1, GL_FALSE, &mvp[0][0]);
 
     glBindTexture(GL_TEXTURE_2D, texture);
