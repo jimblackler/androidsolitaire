@@ -1,6 +1,8 @@
 #include <malloc.h>
 #include "GlUtils.h"
 
+#define ALOGE(...) __android_log_print(ANDROID_LOG_ERROR, "GlUtils", __VA_ARGS__)
+
 bool checkGlError(const char *funcName) {
   GLint err = glGetError();
   if (err != GL_NO_ERROR) {
