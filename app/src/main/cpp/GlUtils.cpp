@@ -1,5 +1,10 @@
-#include <malloc.h>
+
 #include "GlUtils.h"
+
+#include "FileUtils.h"
+
+#include <malloc.h>
+
 
 #define ALOGE(...) __android_log_print(ANDROID_LOG_ERROR, "GlUtils", __VA_ARGS__)
 
@@ -43,12 +48,12 @@ static GLuint createShader(GLenum shaderType, const char *src) {
   return 0;
 }
 
-GLuint createProgram(const char *vtxSrc, const char *fragSrc) {
+static GLuint createProgram(const char *vertexSource,
+                            const char *fragmentSource) {
   GLuint program = 0;
-
-  GLuint vertexShader = createShader(GL_VERTEX_SHADER, vtxSrc);
+  GLuint vertexShader = createShader(GL_VERTEX_SHADER, vertexSource);
   if (vertexShader) {
-    GLuint fragmentShader = createShader(GL_FRAGMENT_SHADER, fragSrc);
+    GLuint fragmentShader = createShader(GL_FRAGMENT_SHADER, fragmentSource);
     if (fragmentShader) {
       program = glCreateProgram();
       if (program) {
@@ -59,12 +64,12 @@ GLuint createProgram(const char *vtxSrc, const char *fragSrc) {
         glGetProgramiv(program, GL_LINK_STATUS, &linked);
         if (!linked) {
           ALOGE("Could not link program");
-          GLint infoLogLen = 0;
-          glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLogLen);
-          if (infoLogLen) {
-            auto infoLog = (GLchar *) malloc((size_t) infoLogLen);
+          GLint logLen = 0;
+          glGetProgramiv(program, GL_INFO_LOG_LENGTH, &logLen);
+          if (logLen) {
+            auto infoLog = (GLchar *) malloc((size_t) logLen);
             if (infoLog) {
-              glGetProgramInfoLog(program, infoLogLen, nullptr, infoLog);
+              glGetProgramInfoLog(program, logLen, nullptr, infoLog);
               ALOGE("Could not link program:\n%s\n", infoLog);
               free(infoLog);
             }
@@ -79,5 +84,16 @@ GLuint createProgram(const char *vtxSrc, const char *fragSrc) {
     }
     glDeleteShader(vertexShader);
   }
+  return program;
+}
+
+GLuint loadProgram(const char *vertexShaderFilename,
+                   const char *fragmentShaderFilename,
+                   AAssetManager *assetManager) {
+  const char *vertexSource = load(vertexShaderFilename, assetManager);
+  const char *fragmentSource = load(fragmentShaderFilename, assetManager);
+  GLuint program = createProgram(vertexSource, fragmentSource);
+  delete fragmentSource;
+  delete vertexSource;
   return program;
 }

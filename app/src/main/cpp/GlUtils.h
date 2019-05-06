@@ -1,5 +1,7 @@
 #include <GLES3/gl32.h>
 #include <android/log.h>
+#include <android/asset_manager.h>
 
 extern bool checkGlError(const char *funcName);
-extern GLuint createProgram(const char *vtxSrc, const char *fragSrc);
+GLuint loadProgram(const char*vertexShaderFilename,
+                   const char*fragmentShaderFilename, AAssetManager * assetManager);

@@ -1,10 +1,10 @@
 #include "Engine.h"
 
-#include "FileUtils.h"
 #include "GlUtils.h"
 
 #include "glm/glm.hpp"
 #include "glm/gtx/transform.hpp"
+#include "FileUtils.h"
 #include <EGL/egl.h>
 #include <GLES/gl.h>
 #include <android/sensor.h>
@@ -115,17 +115,7 @@ private:
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-    const char *vertexShader = load("vertex.vsh", app->activity->assetManager);
-    const char *fragmentShader = load("fragment.fsh", app->activity->assetManager);
-
-    program = createProgram(vertexShader, fragmentShader);
-
-    delete fragmentShader;
-    delete vertexShader;
-
-    if (!program) {
-      return;
-    }
+    program = loadProgram("vertex.vsh", "fragment.fsh", app->activity->assetManager);
 
     matrixId = glGetUniformLocation(program, "MVP");
     textureSamplerId = glGetUniformLocation(program, "textureSampler");
