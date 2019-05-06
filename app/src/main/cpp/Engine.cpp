@@ -99,23 +99,27 @@ private:
 
     glGenBuffers(1, &vertexBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(gVertexBufferData), gVertexBufferData, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(gVertexBufferData), gVertexBufferData,
+                 GL_STATIC_DRAW);
 
     glGenBuffers(1, &uvBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, uvBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(gUvBufferData), gUvBufferData, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(gUvBufferData), gUvBufferData,
+                 GL_STATIC_DRAW);
 
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
 
     char *data = load("cards103x143.rgba", app->activity->assetManager);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1339, 900, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1339, 900, 0, GL_RGBA,
+                 GL_UNSIGNED_BYTE, data);
     delete data;
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-    program = loadProgram("vertex.vsh", "fragment.fsh", app->activity->assetManager);
+    program = loadProgram("vertex.vsh", "fragment.fsh",
+                          app->activity->assetManager);
 
     matrixId = glGetUniformLocation(program, "MVP");
     textureSamplerId = glGetUniformLocation(program, "textureSampler");
