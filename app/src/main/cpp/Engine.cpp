@@ -1,35 +1,29 @@
 #include "Engine.h"
 
 #include "GlUtils.h"
+#include "game/Rules.h"
 
 #include "glm/glm.hpp"
 #include "glm/gtx/transform.hpp"
 #include "FileUtils.h"
+#include "Sprite.h"
 #include <EGL/egl.h>
 #include <GLES/gl.h>
 #include <android/sensor.h>
 #include <memory>
-#include <atomic>
+
 
 #define ALOGI(...) __android_log_print(ANDROID_LOG_ERROR, "Engine", __VA_ARGS__)
-
-static const GLfloat gVertexBufferData[] = {
-    -1.0F, 1.0F, 0.0F,
-    1.0F, 1.0F, 0.0F,
-    -1.0F, -1.0F, 0.0F,
-    1.0F, -1.0F, 0.0F,
-};
-
-static const GLfloat gUvBufferData[] = {
-    0.0F, 0.0F,
-    1.0F, 0.0F,
-    0.0F, 1.0F,
-    1.0F, 1.0F
-};
 
 struct State {
   bool placeholder;
 };
+
+const auto TEXTURE_WIDTH = 1339;
+const auto TEXTURE_HEIGHT = 900;
+
+const auto CARD_WIDTH = 103;
+const auto CARD_HEIGHT = 143;
 
 class LocalEngine : public Engine {
 
@@ -46,7 +40,7 @@ private:
   struct android_app *app;
 
   bool active;
-  EGLDisplay display;
+  EGLDisplay display = 0;
   EGLSurface surface;
   EGLContext context;
 
@@ -55,8 +49,8 @@ private:
 
   ASensorManager *sensorManager;
 
-  GLuint vertexBuffer;
-  GLuint uvBuffer;
+  Sprite *sprite;
+
   GLuint program;
   GLuint texture;
   GLint matrixId;
@@ -65,6 +59,7 @@ private:
   State state;
 
   void initDisplay() {
+    assert(!display);
     display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
     eglInitialize(display, nullptr, nullptr);
 
@@ -97,22 +92,12 @@ private:
     glGenVertexArrays(1, &vertexArrayID);
     glBindVertexArray(vertexArrayID);
 
-    glGenBuffers(1, &vertexBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(gVertexBufferData), gVertexBufferData,
-                 GL_STATIC_DRAW);
-
-    glGenBuffers(1, &uvBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, uvBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(gUvBufferData), gUvBufferData,
-                 GL_STATIC_DRAW);
-
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
 
     char *data = load("cards103x143.rgba", app->activity->assetManager);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1339, 900, 0, GL_RGBA,
-                 GL_UNSIGNED_BYTE, data);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, TEXTURE_WIDTH, TEXTURE_HEIGHT,
+                 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
     delete data;
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -123,6 +108,16 @@ private:
 
     matrixId = glGetUniformLocation(program, "MVP");
     textureSamplerId = glGetUniformLocation(program, "textureSampler");
+
+    sprite = createCard(0, 0);
+  }
+
+  static Sprite* createCard(int suit, int type) {
+    float left = ((float) CARD_WIDTH * type) / TEXTURE_WIDTH;
+    float right = ((float) CARD_WIDTH * type + CARD_WIDTH) / TEXTURE_WIDTH;
+    float top = ((float) CARD_HEIGHT * suit) / TEXTURE_HEIGHT;
+    float bottom = ((float) CARD_HEIGHT * suit + CARD_HEIGHT) / TEXTURE_HEIGHT;
+    return NewSprite(left, right, top, bottom);
   }
 
   void drawFrame() {
@@ -148,15 +143,7 @@ private:
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    glEnableVertexAttribArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-    glEnableVertexAttribArray(1);
-    glBindBuffer(GL_ARRAY_BUFFER, uvBuffer);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    sprite->draw();
 
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);
