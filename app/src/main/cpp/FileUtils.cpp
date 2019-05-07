@@ -12,3 +12,6 @@ char *load(const char *filename, AAssetManager *assetManager) {
   AAsset_close(asset);
   return buffer;
 }
+
+
+
