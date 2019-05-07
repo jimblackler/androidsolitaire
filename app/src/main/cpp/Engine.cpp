@@ -25,6 +25,8 @@ const auto TEXTURE_HEIGHT = 900;
 const auto CARD_WIDTH = 103;
 const auto CARD_HEIGHT = 143;
 
+const auto TARGET_WIDTH = 860;
+
 class LocalEngine : public Engine {
 
 public:
@@ -109,10 +111,10 @@ private:
     matrixId = glGetUniformLocation(program, "MVP");
     textureSamplerId = glGetUniformLocation(program, "textureSampler");
 
-    sprite = createCard(0, 0);
+    sprite = createCard(0, 2);
   }
 
-  static Sprite* createCard(int suit, int type) {
+  static Sprite *createCard(int suit, int type) {
     float left = ((float) CARD_WIDTH * type) / TEXTURE_WIDTH;
     float right = ((float) CARD_WIDTH * type + CARD_WIDTH) / TEXTURE_WIDTH;
     float top = ((float) CARD_HEIGHT * suit) / TEXTURE_HEIGHT;
@@ -132,9 +134,13 @@ private:
     glUseProgram(program);
 
     glm::mat4 mvp = glm::mat4();
-    mvp = glm::scale(mvp, glm::vec3(0.5F, 0.5F, 0));
-    mvp = glm::translate(mvp, glm::vec3(0.5F, 0.5F, 0));
+//    mvp = glm::scale(mvp, glm::vec3(CARD_WIDTH, CARD_HEIGHT, 1));
+    //mvp = glm::translate(mvp, glm::vec3(CARD_WIDTH * 2, CARD_HEIGHT * 2, 0));
+//    mvp = glm::scale(mvp, glm::vec3((float) 1 / TARGET_WIDTH,
+//                                    (float) 1 / TARGET_WIDTH * width / height, 1));
+
     glUniformMatrix4fv(matrixId, 1, GL_FALSE, &mvp[0][0]);
+
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);
