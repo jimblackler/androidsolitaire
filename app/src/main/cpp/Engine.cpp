@@ -134,17 +134,23 @@ private:
     glUseProgram(program);
 
     glm::mat4 mvp = glm::mat4();
-//    mvp = glm::scale(mvp, glm::vec3(CARD_WIDTH, CARD_HEIGHT, 1));
-    //mvp = glm::translate(mvp, glm::vec3(CARD_WIDTH * 2, CARD_HEIGHT * 2, 0));
-//    mvp = glm::scale(mvp, glm::vec3((float) 1 / TARGET_WIDTH,
-//                                    (float) 1 / TARGET_WIDTH * width / height, 1));
+    mvp = glm::scale(mvp, glm::vec3(1, -1, 1));
+    mvp = glm::translate(mvp, glm::vec3(-1, -1, 0));
+    mvp = glm::scale(mvp, glm::vec3(2, 2, 1));
+    mvp = glm::scale(mvp, glm::vec3(1.0F / TARGET_WIDTH,
+                                    1.0F / TARGET_WIDTH * (float) width / height,
+                                    1));
 
-    glUniformMatrix4fv(matrixId, 1, GL_FALSE, &mvp[0][0]);
+
 
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);
     glUniform1i(textureSamplerId, 0);
+
+    glm::mat4 mvp2 = glm::translate(mvp, glm::vec3(CARD_WIDTH, CARD_HEIGHT, 0));
+    mvp2 = glm::scale(mvp2, glm::vec3(CARD_WIDTH, CARD_HEIGHT, 1));
+    glUniformMatrix4fv(matrixId, 1, GL_FALSE, &mvp2[0][0]);
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

@@ -3,10 +3,10 @@
 #include "Sprite.h"
 
 static const GLfloat gVertexBufferData[] = {
-    0, 1.0F, 0,
-    1.0F, 1.0F, 0,
     0, 0, 0,
     1.0F, 0, 0,
+    0, 1.0F, 0,
+    1.0F, 1.0F, 0,
 };
 
 class LocalSprite : public Sprite {
