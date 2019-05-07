@@ -79,7 +79,7 @@ private:
     }
 
     surface = eglCreateWindowSurface(display, config, app->window, nullptr);
-    const EGLint contextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 2,
+    const EGLint contextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 3,
                                      EGL_NONE};
     context = eglCreateContext(display, config, nullptr, contextAttribs);
 
@@ -97,7 +97,7 @@ private:
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
 
-    char *data = load("cards103x143.rgba", app->activity->assetManager);
+    char *data = load("cards103x143.rgba", false, app->activity->assetManager);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, TEXTURE_WIDTH, TEXTURE_HEIGHT,
                  0, GL_RGBA, GL_UNSIGNED_BYTE, data);
     delete data;
