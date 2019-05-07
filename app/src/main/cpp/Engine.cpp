@@ -1,12 +1,14 @@
 #include "Engine.h"
 
 #include "GlUtils.h"
+#include "FileUtils.h"
+#include "Renderer.h"
+#include "Sprite.h"
 #include "game/Rules.h"
 
 #include "glm/glm.hpp"
 #include "glm/gtx/transform.hpp"
-#include "FileUtils.h"
-#include "Sprite.h"
+
 #include <EGL/egl.h>
 #include <GLES/gl.h>
 #include <android/sensor.h>
@@ -36,13 +38,15 @@ public:
     if (app->savedState) {
       state = *(struct State *) app->savedState;
     }
+    this->renderer = NewRenderer();
   }
 
 private:
   struct android_app *app;
+  Renderer *renderer;
 
   bool active;
-  EGLDisplay display = 0;
+  EGLDisplay display = nullptr;
   EGLSurface surface;
   EGLContext context;
 
@@ -127,6 +131,7 @@ private:
       return;
     }
 
+    renderer->drawFrame();
     glClearColor(0.25F, 0.75F, 0.25F, 1.0F);
 
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
@@ -140,9 +145,6 @@ private:
     mvp = glm::scale(mvp, glm::vec3(1.0F / TARGET_WIDTH,
                                     1.0F / TARGET_WIDTH * (float) width / height,
                                     1));
-
-
-
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);

@@ -34,6 +34,7 @@ add_library( # Sets the name of the library.
         Engine.cpp
         FileUtils.cpp
         GlUtils.cpp
+        Renderer.cpp
         Sprite.cpp)
 
 # Searches for a specified prebuilt library and stores the path as a
