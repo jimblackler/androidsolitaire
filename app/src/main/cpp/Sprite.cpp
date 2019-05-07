@@ -12,12 +12,12 @@ static const GLfloat gVertexBufferData[] = {
 class LocalSprite : public Sprite {
 public:
   LocalSprite(GLfloat left, GLfloat right, GLfloat top, GLfloat bottom) {
-    if (!vertexBuffer) {
-      glGenBuffers(1, &vertexBuffer);
-      glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-      glBufferData(GL_ARRAY_BUFFER, sizeof(gVertexBufferData), gVertexBufferData,
-                   GL_STATIC_DRAW);
-    }
+
+    glGenBuffers(1, &vertexBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(gVertexBufferData), gVertexBufferData,
+                 GL_STATIC_DRAW);
+
     GLfloat gUvBufferData[] = {
         left, top,
         right, top,
@@ -31,7 +31,7 @@ public:
   }
 
 private:
-  static GLuint vertexBuffer;
+  GLuint vertexBuffer;
   GLuint uvBuffer;
 
   void draw() override {
@@ -46,8 +46,6 @@ private:
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
   }
 };
-
-GLuint LocalSprite::vertexBuffer = 0;
 
 Sprite *NewSprite(GLfloat left, GLfloat right, GLfloat top, GLfloat bottom) {
   return new LocalSprite(left, right, top, bottom);
