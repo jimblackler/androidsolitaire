@@ -1,6 +1,7 @@
 #pragma once
 
 #include <list>
+
 const auto NUMBER_CARDS = 52;
 const auto NUMBER_TABLEAUS = 7;
 const auto ACE_TYPE = 0;
@@ -11,8 +12,6 @@ const auto CARDS_TO_DRAW = 3; // TODO: make part of GameSettings
 
 class Rules {
 public:
-
-
   static int getSuit(int cardNumber) {
     return cardNumber / NUMBER_CARDS_IN_SUIT;
   };

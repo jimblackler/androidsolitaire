@@ -71,17 +71,18 @@ public:
     }
 
     // Placeholder; stock
-      renderer->placeHolder(STOCK_X, STOCK_Y, [](){});
+    renderer->placeHolder(STOCK_X, STOCK_Y, []() {});
 
     // Placeholder; tableau
-      for (int tableauIdx = 0; tableauIdx != NUMBER_TABLEAUS; tableauIdx++) {
-        renderer->placeHolder(TABLEAU_X + TABLEAU_X_SPACING * tableauIdx, TABLEAU_Y, [](){});
-      }
+    for (int tableauIdx = 0; tableauIdx != NUMBER_TABLEAUS; tableauIdx++) {
+      renderer->placeHolder(TABLEAU_X + TABLEAU_X_SPACING * tableauIdx, TABLEAU_Y, []() {});
+    }
 
     // Placeholder; foundation
-      for (int foundationIdx = 0; foundationIdx != NUMBER_FOUNDATIONS; foundationIdx++) {
-        renderer->placeHolder(FOUNDATION_X + FOUNDATION_X_SPACING * foundationIdx, FOUNDATION_Y, [](){});
-      }
+    for (int foundationIdx = 0; foundationIdx != NUMBER_FOUNDATIONS; foundationIdx++) {
+      renderer->placeHolder(FOUNDATION_X + FOUNDATION_X_SPACING * foundationIdx, FOUNDATION_Y,
+                            []() {});
+    }
   }
 
   void _animate() {
@@ -118,7 +119,7 @@ public:
         t = 1;
       }
       for (int cardNumber : raisingCards) {
-        auto position = renderer->getCardPosition(cardNumber);
+        std::vector<float> position = renderer->getCardPosition(cardNumber);
         renderer->positionCard(cardNumber, position[0], position[1], RAISE_HEIGHT * t);
       }
       if (t == 1) {
@@ -142,18 +143,20 @@ public:
     }
 
     // Position stock cards.
-    int stockLength = gameState->stock.length();
+    auto stock = gameState->getStock();
+    int stockLength = stock.length();
 
     for (int idx = 0; idx != stockLength; idx++) {
-      int cardNumber = gameState->stock.get(idx);
+      int cardNumber = stock.get(idx);
       renderer->faceDown(cardNumber);
       _placeCard(cardNumber, STOCK_X, STOCK_Y, false, 0);
     }
 
     // Position waste cards.
-    int wasteLength = gameState->waste.length();
+    auto waste = gameState->getWaste();
+    int wasteLength = waste.length();
     for (int idx = 0; idx != wasteLength; idx++) {
-      int cardNumber = gameState->waste.get(idx);
+      int cardNumber = waste.get(idx);
 
       renderer->faceUp(cardNumber);
       int staggerOrder = std::max(idx - wasteLength + CARDS_TO_DRAW, 0);
@@ -168,8 +171,9 @@ public:
     }
 
     // Position foundation cards.
+    auto foundations = gameState->getFoundations();
     for (int foundationIdx = 0; foundationIdx != NUMBER_FOUNDATIONS; foundationIdx++) {
-      auto foundation = gameState->foundations[foundationIdx];
+      CardList &foundation = foundations[foundationIdx];
       int foundationLength = foundation.length();
 
       for (int position = 0; position < foundationLength; position++) {
@@ -185,8 +189,10 @@ public:
     }
 
     // Position tableau cards.
+    auto tableausFaceDown = gameState->getTableausFaceDown();
+    auto tableausFaceUp = gameState->getTableausFaceUp();
     for (int tableauIdx = 0; tableauIdx != NUMBER_TABLEAUS; tableauIdx++) {
-      auto tableau = gameState->tableausFaceDown[tableauIdx];
+      auto tableau = tableausFaceDown[tableauIdx];
       int faceDownLength = tableau.length();
       for (int position = 0; position < faceDownLength; position++) {
         int cardNumber = tableau.get(position);
@@ -194,15 +200,11 @@ public:
                    TABLEAU_Y + TABLEAU_Y_SPACING * position, false, 0);
         renderer->faceDown(cardNumber);
       }
-
-      tableau = gameState->tableausFaceUp[tableauIdx];
+      tableau = tableausFaceUp[tableauIdx];
       int tableauLength = tableau.length();
 
       for (int position = 0; position < tableauLength; position++) {
         int cardNumber = tableau.get(position);
-        auto tableauCards = tableau.asArray();
-        std::vector<int> cards;
-        std::copy(tableauCards.begin() + position, tableauCards.end(), cards.begin());
         renderer->faceUp(cardNumber);
         _placeCard(cardNumber, TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
                    TABLEAU_Y + TABLEAU_Y_SPACING * (position + faceDownLength), true, 0);
@@ -367,6 +369,9 @@ public:
 //
 //    this.render();
   }
+
+
+
 
 };
 

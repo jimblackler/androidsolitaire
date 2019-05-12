@@ -31,7 +31,10 @@ public:
   }
 
 private:
-  std::vector<Sprite*> sprites;
+  std::vector<Sprite *> sprites;
+  std::vector<float> x;
+  std::vector<float> y;
+  std::vector<float> z;
 
   GLuint program;
   GLuint texture;
@@ -104,10 +107,13 @@ private:
     matrixId = glGetUniformLocation(program, "MVP");
     textureSamplerId = glGetUniformLocation(program, "textureSampler");
 
+    sprites.reserve(NUMBER_CARDS);
+    x.reserve(NUMBER_CARDS);
+    y.reserve(NUMBER_CARDS);
+    z.reserve(NUMBER_CARDS);
     for (int cardNumber = 0; cardNumber < NUMBER_CARDS; cardNumber++) {
       sprites[cardNumber] = newSprite();
     }
-
   }
 
   void drawFrame() override {
@@ -134,13 +140,13 @@ private:
     glUniform1i(textureSamplerId, 0);
 
     glm::mat4 mvp2 = glm::translate(mvp, glm::vec3(CARD_WIDTH, CARD_HEIGHT, 0));
-    mvp2 = glm::scale(mvp2, glm::vec3(CARD_WIDTH, CARD_HEIGHT, 1));
-    glUniformMatrix4fv(matrixId, 1, GL_FALSE, &mvp2[0][0]);
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     for (int cardNumber = 0; cardNumber < NUMBER_CARDS; cardNumber++) {
+      glm::mat4 mpv3 = glm::scale(mvp2, glm::vec3(x[cardNumber], y[cardNumber], 1));
+      glUniformMatrix4fv(matrixId, 1, GL_FALSE, &mpv3[0][0]);
       sprites[cardNumber]->draw();
     }
 
@@ -150,7 +156,6 @@ private:
   }
 
   void closeDisplay() override {
-
     for (int cardNumber = 0; cardNumber < NUMBER_CARDS; cardNumber++) {
       delete sprites[cardNumber];
     }
@@ -176,7 +181,7 @@ private:
   }
 
   void _setBy(int cardNumber, int suit, int type) {
-    Sprite* sprite = sprites[cardNumber];
+    Sprite *sprite = sprites[cardNumber];
 
     float left = ((float) CARD_WIDTH * type) / TEXTURE_WIDTH;
     float right = ((float) CARD_WIDTH * type + CARD_WIDTH) / TEXTURE_WIDTH;
@@ -196,12 +201,16 @@ private:
     _setBy(cardNumber, suit, type);
   }
 
-  void positionCard(int cardNumber, float x, float y, float z) override {}
+  void positionCard(int cardNumber, float x, float y, float z) override {
+    this->x[cardNumber] = x;
+    this->y[cardNumber] = y;
+    this->z[cardNumber] = z;
+  }
 
   void raiseCard(int cardNumber) override {}
 
   std::vector<float> getCardPosition(int cardNumber) override {
-    return std::vector<float>();
+    return std::vector<float>{x[cardNumber], y[cardNumber], z[cardNumber]};
   }
 
   void setDragHandler(DragHandler *dragHandler) override {

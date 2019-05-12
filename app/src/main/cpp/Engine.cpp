@@ -21,24 +21,20 @@ public:
     this->app = app;
     sensorManager = ASensorManager_getInstance();
     if (app->savedState) {
-      state = *(struct State *) app->savedState;
+      state = *(struct State *) app->savedState;  // TODO ... gameState into savedState
     }
     this->renderer = newRenderer(app);
-
-    auto gameState = new GameState();
-    auto controller = newGameController(renderer, gameState);
-    renderer->setDragHandler(controller);
-    controller->render();
+    this->gameState = newGameState();
+    this->gameState->newGame();
   }
 
 private:
   struct android_app *app;
   Renderer *renderer;
-
+  GameController *controller;
+  GameState *gameState;
   bool active;
-
   ASensorManager *sensorManager;
-
   State state;
 
   int32_t handleInput(AInputEvent *event) override {
@@ -55,11 +51,16 @@ private:
       case APP_CMD_INIT_WINDOW:
         if (app->window) {
           renderer->initDisplay();
+          this->controller = newGameController(renderer, this->gameState);
+          renderer->setDragHandler(this->controller);
+          this->controller->render();
           renderer->drawFrame();
         }
         break;
       case APP_CMD_TERM_WINDOW:
         renderer->closeDisplay();
+        delete this->controller;
+        this->controller = nullptr;
         break;
       case APP_CMD_GAINED_FOCUS:
         active = true;
