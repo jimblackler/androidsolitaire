@@ -1,10 +1,12 @@
 class MathUtils {
 public:
-  static float toT(float start, float end, float value) {
-    return (value - start) / (end - start);
+  template <typename T>
+  static float toT(T start, T end, T value) {
+    return (float) (value - start) / (end - start);
   }
 
-  static float tInRange(float start, float end, float t) {
+  template <typename T>
+  static float tInRange(T start, T end, float t) {
     return t * (end - start) + start;
   }
 };

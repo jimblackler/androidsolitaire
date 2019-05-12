@@ -8,6 +8,7 @@ class GameController : public DragHandler {
 public:
   virtual ~GameController() = default;
   virtual void render() = 0;
+  virtual void animate() = 0;
   virtual void placeHolder(const int x, const int y, void (*onClick)()) = 0;
 };
 

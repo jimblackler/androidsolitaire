@@ -51,10 +51,11 @@ private:
       case APP_CMD_INIT_WINDOW:
         if (app->window) {
           renderer->initDisplay();
-          this->controller = newGameController(renderer, this->gameState);
+          controller = newGameController(renderer, this->gameState);
           renderer->setDragHandler(this->controller);
-          this->controller->render();
-          renderer->drawFrame();
+          controller->render();
+          controller->animate();  // TODO ... required to do here?
+          renderer->drawFrame();  // TODO ... required to do here?
         }
         break;
       case APP_CMD_TERM_WINDOW:
@@ -67,7 +68,8 @@ private:
         break;
       case APP_CMD_LOST_FOCUS:
         active = false;
-        renderer->drawFrame();
+        controller->animate();  // TODO ... required to do here?
+        renderer->drawFrame();  // TODO ... required to do here?
         break;
       case APP_CMD_SAVE_STATE:
         app->savedStateSize = sizeof(struct State);
@@ -109,7 +111,7 @@ private:
         }
       }
       if (active) {
-        // <-- do process here
+        controller->animate();
         renderer->drawFrame();
       }
     }

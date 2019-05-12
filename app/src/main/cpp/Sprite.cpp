@@ -24,8 +24,6 @@ private:
   GLuint uvBuffer;
 
   void setUVs(float left, float right, float top, float bottom) override {
-
-
     GLfloat gUvBufferData[] = {
         left, top,
         right, top,
@@ -37,6 +35,7 @@ private:
     glBufferData(GL_ARRAY_BUFFER, sizeof(gUvBufferData), gUvBufferData,
                  GL_STATIC_DRAW);
   }
+
   void draw() override {
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
@@ -47,6 +46,9 @@ private:
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
 
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+    glDisableVertexAttribArray(1);
+    glDisableVertexAttribArray(0);
   }
 };
 

@@ -33,8 +33,8 @@ static const auto FLY_HEIGHT = 30;
 static const auto FLY_DISTANCE_MAX = 800;
 
 struct Curve {
-  float startTime;
-  float endTime;
+  long long startTime;
+  long long endTime;
 
   std::vector<float> start;
 
@@ -45,10 +45,10 @@ struct Curve {
   bool draggable;
 };
 
-static float getTimeNow() {
+static long long getTimeNow() {
   struct timeval timeVal;
   gettimeofday(&timeVal, nullptr);
-  return timeVal.tv_sec * 1000000 + timeVal.tv_usec;
+  return timeVal.tv_sec * 1000 + timeVal.tv_usec / 1000;
 }
 
 
@@ -85,15 +85,15 @@ public:
     }
   }
 
-  void _animate() {
-    auto timeNow = getTimeNow();
-    for (auto pair : curves) {
+  void animate() override {
+    long long timeNow = getTimeNow();
+    for (auto const &pair : curves) {
       auto k = pair.first;
       auto curve = pair.second;
       if (timeNow < curve.startTime) {
         continue;
       }
-      auto t = MathUtils::toT(curve.startTime, curve.endTime, timeNow);
+      float t = MathUtils::toT(curve.startTime, curve.endTime, timeNow);
       if (t > 1) {
         renderer->positionCard(k, curve.endX, curve.endY, 0);
         curves.erase(k);
@@ -103,7 +103,7 @@ public:
 
         if (curve.start[2] < curve.flyHeight) {
           float start = (float) M_PI - asinf(curve.start[2] / curve.flyHeight);
-          float a = MathUtils::tInRange(start, 0, t);
+          float a = MathUtils::tInRange(start, 0.0F, t);
           v = sinf(a) * curve.flyHeight;
         } else {
           v = curve.start[2] * (1 - t);
@@ -252,8 +252,8 @@ public:
 //    }
   }
 
-  void _placeCard(int cardNumber, float x, float y, bool draggable, float delay) {
-    float timeNow = getTimeNow();
+  void _placeCard(int cardNumber, float x, float y, bool draggable, int delay) {
+    long long timeNow = getTimeNow();
     renderer->raiseCard(cardNumber);
 
     std::vector<float> position = renderer->getCardPosition(cardNumber);
@@ -265,9 +265,10 @@ public:
     float flyHeight = FLY_HEIGHT * flyDistance / FLY_DISTANCE_MAX;
     float animationDistance = std::min(distance, (float) ANIMATION_DISTANCE_MAX);
 
-    float animationTime = ANIMATION_TEST_SLOWDOWN *
-                          (ANIMATION_TIME * animationDistance / ANIMATION_DISTANCE_MAX +
-                           ANIMATION_TIME_SUPPLEMENT);
+    long animationTime = ANIMATION_TEST_SLOWDOWN *
+                         (int) (ANIMATION_TIME * animationDistance
+                                / ANIMATION_DISTANCE_MAX +
+                                ANIMATION_TIME_SUPPLEMENT);
 
     Curve curve;
     curve.startTime = timeNow + delay;
@@ -369,8 +370,6 @@ public:
 //
 //    this.render();
   }
-
-
 
 
 };

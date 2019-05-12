@@ -23,6 +23,9 @@ const int CARD_HEIGHT = 143;
 
 const int TARGET_WIDTH = 860;
 
+const int BLANK_ROW = 4;
+const int CARDBACK_COLUMN = 0;
+
 
 class LocalRenderer : public Renderer {
 public:
@@ -139,19 +142,18 @@ private:
     glBindTexture(GL_TEXTURE_2D, texture);
     glUniform1i(textureSamplerId, 0);
 
-    glm::mat4 mvp2 = glm::translate(mvp, glm::vec3(CARD_WIDTH, CARD_HEIGHT, 0));
+
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     for (int cardNumber = 0; cardNumber < NUMBER_CARDS; cardNumber++) {
-      glm::mat4 mpv3 = glm::scale(mvp2, glm::vec3(x[cardNumber], y[cardNumber], 1));
-      glUniformMatrix4fv(matrixId, 1, GL_FALSE, &mpv3[0][0]);
+      glm::mat4 mvp2 = glm::translate(mvp, glm::vec3(x[cardNumber], y[cardNumber], 0));
+      mvp2 = glm::scale(mvp2, glm::vec3(CARD_WIDTH, CARD_HEIGHT, 1));
+      glUniformMatrix4fv(matrixId, 1, GL_FALSE, &mvp2[0][0]);
       sprites[cardNumber]->draw();
     }
 
-    glDisableVertexAttribArray(0);
-    glDisableVertexAttribArray(1);
     eglSwapBuffers(display, surface);
   }
 
@@ -192,7 +194,7 @@ private:
   }
 
   void faceDown(int cardNumber) override {
-    _setBy(cardNumber, 4, 0);
+    _setBy(cardNumber, BLANK_ROW, CARDBACK_COLUMN);
   }
 
   void faceUp(int cardNumber) override {
