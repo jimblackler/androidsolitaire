@@ -33,6 +33,7 @@ add_library( # Sets the name of the library.
         main.cpp
         Engine.cpp
         FileUtils.cpp
+        game/GameController.cpp
         GlUtils.cpp
         Renderer.cpp
         Sprite.cpp)

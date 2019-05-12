@@ -1,6 +1,8 @@
 #include "Engine.h"
 
 #include "Renderer.h"
+#include "game/GameState.h"
+#include "game/GameController.h"
 #include <android/sensor.h>
 #include <memory>
 
@@ -21,7 +23,12 @@ public:
     if (app->savedState) {
       state = *(struct State *) app->savedState;
     }
-    this->renderer = NewRenderer(app);
+    this->renderer = newRenderer(app);
+
+    auto gameState = new GameState();
+    auto controller = newGameController(renderer, gameState);
+    renderer->setDragHandler(controller);
+    controller->render();
   }
 
 private:

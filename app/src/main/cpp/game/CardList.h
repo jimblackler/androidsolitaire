@@ -1,3 +1,5 @@
+#pragma once
+
 #include <vector>
 
 class CardList {
@@ -5,50 +7,52 @@ class CardList {
 public:
 
   CardList() {
-
-
   }
 
   void add(int cardNumber) {
     cards.push_back(cardNumber);
   }
-//
-//  pushFront(cardNumber) {
-//      return this.cards.splice(0, 0, cardNumber);
-//  }
-//
-//  asArray() {
-//    return this.cards;
-//  }
-//
-//  get(idx) {
-//      return this.cards[idx];
-//  }
-//
-//  length() {
-//    return this.cards.length;
-//  }
-//
-//  pop() {
-//    return this.cards.pop();
-//  }
-//
-//  indexOf(cardNumber) {
-//      return this.cards.indexOf(cardNumber);
-//  }
-//
-//  remove(cardNumber) {
-//      const idx = this.indexOf(cardNumber);
-//      if (idx === -1) {
-//        return false;
-//      } else {
-//        this.cards.splice(idx, 1);
-//        return true;
-//      }
-//  }
+
+  void pushFront(int cardNumber) {
+    cards.insert(cards.begin(), cardNumber);
+  }
+
+  std::vector<int> asArray() {  //TODO rename in C++ version
+    return cards;
+  }
+
+  int get(int idx) {
+    return cards[idx];
+  }
+
+  unsigned int length() {
+    return (int) cards.size();
+  }
+
+  int pop() {
+    int result = cards.back();
+    cards.pop_back();
+    return result;
+  }
+
+  int indexOf(int cardNumber) {
+    auto entry = find(cards.begin(), cards.end(), cardNumber);
+    if (entry == cards.end()) {
+      return -1;
+    }
+    return (int) (entry - cards.begin());
+  }
+
+  bool remove(int cardNumber) {
+    auto entry = find(cards.begin(), cards.end(), cardNumber);
+    if (entry == cards.end()) {
+      return false;
+    }
+    cards.erase(entry);
+    return true;
+  }
 
   void shuffle() {
     std::random_shuffle(cards.begin(), cards.end());
-
   }
 };

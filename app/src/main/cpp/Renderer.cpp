@@ -2,7 +2,9 @@
 
 #include "GlUtils.h"
 #include "FileUtils.h"
-#include "Sprite.h"
+#include "game/GameController.h"
+#include "game/GameState.h"
+
 #include "glm/glm.hpp"
 #include "glm/gtx/transform.hpp"
 #include <EGL/egl.h>
@@ -10,14 +12,16 @@
 #include <android_native_app_glue.h>
 #include <cassert>
 
+#include "Sprite.h"
 
-const auto TEXTURE_WIDTH = 1339;
-const auto TEXTURE_HEIGHT = 900;
 
-const auto CARD_WIDTH = 103;
-const auto CARD_HEIGHT = 143;
+const int TEXTURE_WIDTH = 1339;
+const int TEXTURE_HEIGHT = 900;
 
-const auto TARGET_WIDTH = 860;
+const int CARD_WIDTH = 103;
+const int CARD_HEIGHT = 143;
+
+const int TARGET_WIDTH = 860;
 
 
 class LocalRenderer : public Renderer {
@@ -27,7 +31,7 @@ public:
   }
 
 private:
-  Sprite *sprite;
+  std::vector<Sprite*> sprites;
 
   GLuint program;
   GLuint texture;
@@ -40,8 +44,13 @@ private:
 
   EGLint width;
   EGLint height;
+
+  DragHandler *dragHandler;
+
   android_app *app;
 
+
+  ~LocalRenderer() = default;
 
   void initDisplay() override {
     assert(!display);
@@ -95,15 +104,10 @@ private:
     matrixId = glGetUniformLocation(program, "MVP");
     textureSamplerId = glGetUniformLocation(program, "textureSampler");
 
-    sprite = createCard(0, 2);
-  }
+    for (int cardNumber = 0; cardNumber < NUMBER_CARDS; cardNumber++) {
+      sprites[cardNumber] = newSprite();
+    }
 
-  static Sprite *createCard(int suit, int type) {
-    float left = ((float) CARD_WIDTH * type) / TEXTURE_WIDTH;
-    float right = ((float) CARD_WIDTH * type + CARD_WIDTH) / TEXTURE_WIDTH;
-    float top = ((float) CARD_HEIGHT * suit) / TEXTURE_HEIGHT;
-    float bottom = ((float) CARD_HEIGHT * suit + CARD_HEIGHT) / TEXTURE_HEIGHT;
-    return NewSprite(left, right, top, bottom);
   }
 
   void drawFrame() override {
@@ -136,17 +140,21 @@ private:
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    sprite->draw();
+    for (int cardNumber = 0; cardNumber < NUMBER_CARDS; cardNumber++) {
+      sprites[cardNumber]->draw();
+    }
 
     glDisableVertexAttribArray(0);
     glDisableVertexAttribArray(1);
     eglSwapBuffers(display, surface);
-
-
   }
 
   void closeDisplay() override {
-    delete sprite;
+
+    for (int cardNumber = 0; cardNumber < NUMBER_CARDS; cardNumber++) {
+      delete sprites[cardNumber];
+    }
+
     if (display != EGL_NO_DISPLAY) {
       eglMakeCurrent(display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
       if (context != EGL_NO_CONTEXT) {
@@ -162,8 +170,47 @@ private:
     surface = EGL_NO_SURFACE;
   }
 
+
+  void placeHolder(const int x, const int y, void (*onClick)()) override {
+
+  }
+
+  void _setBy(int cardNumber, int suit, int type) {
+    Sprite* sprite = sprites[cardNumber];
+
+    float left = ((float) CARD_WIDTH * type) / TEXTURE_WIDTH;
+    float right = ((float) CARD_WIDTH * type + CARD_WIDTH) / TEXTURE_WIDTH;
+    float top = ((float) CARD_HEIGHT * suit) / TEXTURE_HEIGHT;
+    float bottom = ((float) CARD_HEIGHT * suit + CARD_HEIGHT) / TEXTURE_HEIGHT;
+
+    sprite->setUVs(left, right, top, bottom);
+  }
+
+  void faceDown(int cardNumber) override {
+    _setBy(cardNumber, 4, 0);
+  }
+
+  void faceUp(int cardNumber) override {
+    int suit = Rules::getSuit(cardNumber);
+    int type = Rules::getType(cardNumber);
+    _setBy(cardNumber, suit, type);
+  }
+
+  void positionCard(int cardNumber, float x, float y, float z) override {}
+
+  void raiseCard(int cardNumber) override {}
+
+  std::vector<float> getCardPosition(int cardNumber) override {
+    return std::vector<float>();
+  }
+
+  void setDragHandler(DragHandler *dragHandler) override {
+    this->dragHandler = dragHandler;
+  }
+
 };
 
-Renderer *NewRenderer(android_app *app) {
+Renderer *newRenderer(android_app *app) {
   return new LocalRenderer(app);
 }
+

@@ -1,28 +1,31 @@
+#pragma once
+
 #include <list>
+const auto NUMBER_CARDS = 52;
+const auto NUMBER_TABLEAUS = 7;
+const auto ACE_TYPE = 0;
+const auto KING_TYPE = 12;
+const auto NUMBER_CARDS_IN_SUIT = 13;
+const auto NUMBER_FOUNDATIONS = 4;
+const auto CARDS_TO_DRAW = 3; // TODO: make part of GameSettings
 
 class Rules {
 public:
 
-  static const auto NUMBER_CARDS = 52;
-  static const auto NUMBER_TABLEAUS = 7;
-  static const auto ACE_TYPE = 0;
-  static const auto KING_TYPE = 12;
-  static const auto NUMBER_CARDS_IN_SUIT = 13;
-  static const auto NUMBER_FOUNDATIONS = 4;
 
-  int getSuit(int cardNumber) {
+  static int getSuit(int cardNumber) {
     return cardNumber / NUMBER_CARDS_IN_SUIT;
   };
 
-  int getType(int cardNumber) {
+  static int getType(int cardNumber) {
     return cardNumber % NUMBER_CARDS_IN_SUIT;
   };
 
-  int getCard(int suit, int type) {
+  static int getCard(int suit, int type) {
     return suit * NUMBER_CARDS_IN_SUIT + type;
   };
 
-  std::list<int> canPlaceOnInTableau(int cardNumber) {
+  static std::list<int> canPlaceOnInTableau(int cardNumber) {
     const int suit = getSuit(cardNumber);
     const int type = getType(cardNumber);
     if (type == ACE_TYPE) {
@@ -35,7 +38,7 @@ public:
     }
   }
 
-  std::list<int> canPlaceOnInFoundation(int cardNumber) {
+  static std::list<int> canPlaceOnInFoundation(int cardNumber) {
     const int suit = getSuit(cardNumber);
     const int type = getType(cardNumber);
     if (type == KING_TYPE) {

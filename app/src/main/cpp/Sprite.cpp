@@ -11,7 +11,7 @@ static const GLfloat gVertexBufferData[] = {
 
 class LocalSprite : public Sprite {
 public:
-  LocalSprite(GLfloat left, GLfloat right, GLfloat top, GLfloat bottom) {
+  void setUVs(float left, float right, float top, float bottom) override {
 
     glGenBuffers(1, &vertexBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
@@ -47,6 +47,6 @@ private:
   }
 };
 
-Sprite *NewSprite(GLfloat left, GLfloat right, GLfloat top, GLfloat bottom) {
-  return new LocalSprite(left, right, top, bottom);
+Sprite *newSprite() {
+  return new LocalSprite();
 }
