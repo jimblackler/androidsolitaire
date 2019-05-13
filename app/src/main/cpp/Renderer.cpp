@@ -20,7 +20,7 @@ const int TEXTURE_HEIGHT = 900;
 const int CARD_WIDTH = 103;
 const int CARD_HEIGHT = 143;
 
-const int TARGET_WIDTH = 820;
+const int TARGET_WIDTH = 810;
 
 const int BLANK_ROW = 4;
 const int CARDBACK_COLUMN = 0;
