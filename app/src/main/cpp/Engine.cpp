@@ -24,6 +24,7 @@ public:
     }
     this->gameState = newGameState();
     this->gameState->newGame();
+    active = false;
   }
 
 private:
@@ -50,6 +51,7 @@ private:
           renderer = newRenderer(app);
           controller = newGameController(renderer, this->gameState);
           renderer->setDragHandler(this->controller);
+          controller->render();
           controller->render();
         }
         break;

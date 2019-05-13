@@ -136,8 +136,8 @@ public:
       auto k = pair.first;
       auto curve = pair.second;
       renderer->positionCard(k, curve.endX, curve.endY, 0);
-      curves.erase(k);
     }
+    curves.clear();
 
     // Position stock cards.
     auto stock = gameState->getStock();
