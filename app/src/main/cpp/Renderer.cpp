@@ -14,14 +14,13 @@
 
 #include "Sprite.h"
 
-
 const int TEXTURE_WIDTH = 1339;
 const int TEXTURE_HEIGHT = 900;
 
 const int CARD_WIDTH = 103;
 const int CARD_HEIGHT = 143;
 
-const int TARGET_WIDTH = 860;
+const int TARGET_WIDTH = 820;
 
 const int BLANK_ROW = 4;
 const int CARDBACK_COLUMN = 0;
@@ -35,6 +34,7 @@ public:
 
 private:
   std::vector<Sprite *> sprites;
+  std::list<int> order;
   std::vector<float> x;
   std::vector<float> y;
   std::vector<float> z;
@@ -43,18 +43,15 @@ private:
   GLuint texture;
   GLint matrixId;
   GLint textureSamplerId;
-
   EGLDisplay display = nullptr;
   EGLSurface surface;
   EGLContext context;
-
   EGLint width;
   EGLint height;
 
   DragHandler *dragHandler;
 
   android_app *app;
-
 
   ~LocalRenderer() = default;
 
@@ -115,6 +112,7 @@ private:
     y.reserve(NUMBER_CARDS);
     z.reserve(NUMBER_CARDS);
     for (int cardNumber = 0; cardNumber < NUMBER_CARDS; cardNumber++) {
+      order.push_back(cardNumber);
       sprites[cardNumber] = newSprite();
     }
   }
@@ -142,12 +140,10 @@ private:
     glBindTexture(GL_TEXTURE_2D, texture);
     glUniform1i(textureSamplerId, 0);
 
-
-
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    for (int cardNumber = 0; cardNumber < NUMBER_CARDS; cardNumber++) {
+    for (int cardNumber : order) {
       glm::mat4 mvp2 = glm::translate(mvp, glm::vec3(x[cardNumber], y[cardNumber], 0));
       mvp2 = glm::scale(mvp2, glm::vec3(CARD_WIDTH, CARD_HEIGHT, 1));
       glUniformMatrix4fv(matrixId, 1, GL_FALSE, &mvp2[0][0]);
@@ -209,7 +205,10 @@ private:
     this->z[cardNumber] = z;
   }
 
-  void raiseCard(int cardNumber) override {}
+  void raiseCard(int cardNumber) override {
+    order.remove(cardNumber);
+    order.push_back(cardNumber);
+  }
 
   std::vector<float> getCardPosition(int cardNumber) override {
     return std::vector<float>{x[cardNumber], y[cardNumber], z[cardNumber]};

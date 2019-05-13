@@ -10,14 +10,14 @@
 #include <map>
 #include <sys/time.h>
 
-static const auto STOCK_X = 42;
-static const auto STOCK_Y = 42;
+static const auto STOCK_X = 16;
+static const auto STOCK_Y = 30;
 static const auto TABLEAU_X = STOCK_X;
-static const auto TABLEAU_Y = 210;
-static const auto TABLEAU_X_SPACING = 115;
-static const auto TABLEAU_Y_SPACING = 25;
+static const auto TABLEAU_Y = 180;
+static const auto TABLEAU_X_SPACING = 110;
+static const auto TABLEAU_Y_SPACING = 14;
 static const auto FOUNDATION_X = 386;
-static const auto FOUNDATION_X_SPACING = 115;
+static const auto FOUNDATION_X_SPACING = 110;
 static const auto FOUNDATION_Y = STOCK_Y;
 static const auto WASTE_X = 196;
 static const auto WASTE_X_SPACING = 22;
@@ -35,13 +35,10 @@ static const auto FLY_DISTANCE_MAX = 800;
 struct Curve {
   long long startTime;
   long long endTime;
-
   std::vector<float> start;
-
   float flyHeight;
   float endX;
   float endY;
-
   bool draggable;
 };
 
@@ -87,16 +84,18 @@ public:
 
   void animate() override {
     long long timeNow = getTimeNow();
-    for (auto const &pair : curves) {
-      auto k = pair.first;
+    auto it = curves.cbegin();
+    while (it != curves.cend()) {
+      auto pair = *it;
+      auto cardNumber = pair.first;
       auto curve = pair.second;
       if (timeNow < curve.startTime) {
         continue;
       }
       float t = MathUtils::toT(curve.startTime, curve.endTime, timeNow);
       if (t > 1) {
-        renderer->positionCard(k, curve.endX, curve.endY, 0);
-        curves.erase(k);
+        renderer->positionCard(cardNumber, curve.endX, curve.endY, 0);
+        curves.erase(it++);
       } else {
         float multiplier1 = sinf(t * (float) M_PI / 2);
         float v;
@@ -109,8 +108,9 @@ public:
           v = curve.start[2] * (1 - t);
         }
 
-        renderer->positionCard(k, MathUtils::tInRange(curve.start[0], curve.endX, multiplier1),
+        renderer->positionCard(cardNumber, MathUtils::tInRange(curve.start[0], curve.endX, multiplier1),
                                MathUtils::tInRange(curve.start[1], curve.endY, multiplier1), v);
+        it++;
       }
     }
     if (!raisingCards.empty()) {
@@ -160,7 +160,7 @@ public:
 
       renderer->faceUp(cardNumber);
       int staggerOrder = std::max(idx - wasteLength + CARDS_TO_DRAW, 0);
-      float delay = staggerOrder * WASTE_DRAW_STAGGER * ANIMATION_TEST_SLOWDOWN;
+      int delay = staggerOrder * WASTE_DRAW_STAGGER * ANIMATION_TEST_SLOWDOWN;
 
       int position = idx - (wasteLength - std::min(CARDS_TO_DRAW, wasteLength));
       if (position < 0) {
