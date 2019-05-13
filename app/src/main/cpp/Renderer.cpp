@@ -99,6 +99,8 @@ private:
   std::vector<Sprite *> cardSprites;
   std::list<int> order;
   std::set<int> draggable;
+  float previousX;
+  float previousY;
   std::list<int> draggingCards;
   std::vector<float> x;
   std::vector<float> y;
@@ -118,7 +120,6 @@ private:
   DragHandler *dragHandler;
 
   android_app *app;
-
 
   ~LocalRenderer() {
     for (Sprite *sprite: cardSprites) {
@@ -248,7 +249,6 @@ private:
     x = x / width * TARGET_WIDTH;
     y = y / height * targetHeight;
 
-
     if (this->draggingCards.empty()) {
       for (auto it = order.rbegin(); it != order.rend(); it++) {
         int cardNumber = *it;
@@ -269,12 +269,21 @@ private:
           std::list<int> cards = dragHandler->startDrag(cardNumber);
           //this.click = true;
           this->draggingCards = cards;
+          for (int draggingCard : draggingCards) {
+            this->raiseCard(draggingCard);
+          }
           break;
         }
       }
     } else {
-
+      for (int cardNumber : draggingCards) {
+        this->x[cardNumber] += x - previousX;
+        this->y[cardNumber] += y - previousY;
+      }
     }
+
+    previousX = x;
+    previousY = y;
   }
 };
 
