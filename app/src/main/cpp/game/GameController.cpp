@@ -130,10 +130,6 @@ public:
     }
   };
 
-  void placeHolder(const int x, const int y, void (*onClick)()) override {
-
-  }
-
   void render() override {
     // Stop all animations immediately (old onArrive functions are invalid)
     for (const auto &pair : curves) {
@@ -283,7 +279,7 @@ public:
     curves[cardNumber] = curve;
   }
 
-  std::list<int> startDrag(int card) {
+  std::list<int> startDrag(int card) override {
     auto cards = gameState->getStack(card);
     riseStarted = getTimeNow();
     raisingCards = cards;

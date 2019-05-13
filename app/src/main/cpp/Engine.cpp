@@ -54,9 +54,11 @@ private:
         }
         break;
       case APP_CMD_TERM_WINDOW:
+        renderer->setDragHandler(nullptr);
         renderer->closeDisplay();
         delete this->controller;
         this->controller = nullptr;
+        active = false;
         break;
       case APP_CMD_GAINED_FOCUS:
         active = true;
@@ -69,6 +71,8 @@ private:
         app->savedState = malloc(app->savedStateSize);
         *((struct State *) app->savedState) = state;
         break;
+      case APP_CMD_DESTROY:
+        break;
       case APP_CMD_INPUT_CHANGED:
       case APP_CMD_WINDOW_RESIZED:
       case APP_CMD_WINDOW_REDRAW_NEEDED:
@@ -79,7 +83,7 @@ private:
       case APP_CMD_RESUME:
       case APP_CMD_PAUSE:
       case APP_CMD_STOP:
-      case APP_CMD_DESTROY:
+
       default:
         break;
     }
@@ -88,22 +92,20 @@ private:
   void mainLoop() override {
     while (true) {
       while (true) {
-        struct android_poll_source *source;
-        int events;
+        struct android_poll_source *source = nullptr;
+        int events = 0;
         int id = ALooper_pollAll(active ? 0 : -1,
                                  nullptr, &events, (void **) &source);
-        if (id <= 0) {
+        if (id < 0 && !source) {
           break;
         }
-        if (source) {
-          source->process(app, source);
-        }
+        source->process(app, source);
         if (app->destroyRequested) {
           renderer->closeDisplay();
           return;
         }
       }
-      if (active) {
+      if (active && controller) {
         controller->animate();
         renderer->drawFrame();
       }

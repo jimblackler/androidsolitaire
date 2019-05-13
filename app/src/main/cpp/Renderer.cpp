@@ -42,6 +42,7 @@ private:
   std::vector<Sprite *> cardSprites;
   std::list<int> order;
   std::set<int> draggable;
+  std::list<int> draggingCards;
   std::vector<float> x;
   std::vector<float> y;
   std::vector<float> z;
@@ -125,6 +126,30 @@ private:
     }
   }
 
+  void closeDisplay() override {
+    for (Sprite* sprite: cardSprites) {
+      delete sprite;
+    }
+
+    for (PlaceHolder& placeHolder: placeHolders) {
+      delete placeHolder.sprite;
+    }
+
+    if (display != EGL_NO_DISPLAY) {
+      eglMakeCurrent(display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+      if (context != EGL_NO_CONTEXT) {
+        eglDestroyContext(display, context);
+      }
+      if (surface != EGL_NO_SURFACE) {
+        eglDestroySurface(display, surface);
+      }
+      eglTerminate(display);
+    }
+    display = EGL_NO_DISPLAY;
+    context = EGL_NO_CONTEXT;
+    surface = EGL_NO_SURFACE;
+  }
+
   void drawFrame() override {
     if (!display) {
       return;
@@ -169,29 +194,7 @@ private:
     eglSwapBuffers(display, surface);
   }
 
-  void closeDisplay() override {
-    for (Sprite* sprite: cardSprites) {
-      delete sprite;
-    }
 
-    for (PlaceHolder& placeHolder: placeHolders) {
-      delete placeHolder.sprite;
-    }
-
-    if (display != EGL_NO_DISPLAY) {
-      eglMakeCurrent(display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
-      if (context != EGL_NO_CONTEXT) {
-        eglDestroyContext(display, context);
-      }
-      if (surface != EGL_NO_SURFACE) {
-        eglDestroySurface(display, surface);
-      }
-      eglTerminate(display);
-    }
-    display = EGL_NO_DISPLAY;
-    context = EGL_NO_CONTEXT;
-    surface = EGL_NO_SURFACE;
-  }
 
   void placeHolder(const int x, const int y, void (*onClick)()) override {
     Sprite* sprite = newSprite();
@@ -254,32 +257,34 @@ private:
     x = x / width * TARGET_WIDTH;
     y = y / height * targetHeight;
 
-    for (auto it = order.rbegin(); it != order.rend(); it++) {
-      int cardNumber = *it;
-      if (x < this->x[cardNumber]) {
-        continue;
-      }
-      if (y < this->y[cardNumber]) {
-        continue;
-      }
-      if (x > this->x[cardNumber] + CARD_WIDTH) {
-        continue;
-      }
-      if (y > this->y[cardNumber] + CARD_HEIGHT) {
-        continue;
-      }
 
-      if (this->draggable.count(cardNumber)) {
-        this->x[cardNumber] = -500;
-        this->y[cardNumber] = -500;
-        break;
+    if (this->draggingCards.empty()) {
+      for (auto it = order.rbegin(); it != order.rend(); it++) {
+        int cardNumber = *it;
+        if (x < this->x[cardNumber]) {
+          continue;
+        }
+        if (y < this->y[cardNumber]) {
+          continue;
+        }
+        if (x > this->x[cardNumber] + CARD_WIDTH) {
+          continue;
+        }
+        if (y > this->y[cardNumber] + CARD_HEIGHT) {
+          continue;
+        }
+
+        if (this->draggable.count(cardNumber)) {
+          std::list<int> cards = dragHandler->startDrag(cardNumber);
+          //this.click = true;
+          this->draggingCards = cards;
+          break;
+        }
       }
+    } else {
 
     }
-
   }
-
-
 };
 
 Renderer *newRenderer(android_app *app) {
