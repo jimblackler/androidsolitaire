@@ -22,16 +22,15 @@ public:
     if (app->savedState) {
       state = *(struct State *) app->savedState;  // TODO ... gameState into savedState
     }
-    this->renderer = newRenderer(app);
     this->gameState = newGameState();
     this->gameState->newGame();
   }
 
 private:
-  struct android_app *app;
-  Renderer *renderer;
-  GameController *controller;
-  GameState *gameState;
+  struct android_app *app = nullptr;
+  Renderer *renderer = nullptr;
+  GameController *controller = nullptr;;
+  GameState *gameState = nullptr;
   bool active;
   State state;
 
@@ -47,15 +46,16 @@ private:
     switch (cmd) {
       case APP_CMD_INIT_WINDOW:
         if (app->window) {
-          renderer->initDisplay();
+          assert(!renderer);
+          renderer = newRenderer(app);
           controller = newGameController(renderer, this->gameState);
           renderer->setDragHandler(this->controller);
           controller->render();
         }
         break;
       case APP_CMD_TERM_WINDOW:
-        renderer->setDragHandler(nullptr);
-        renderer->closeDisplay();
+        delete renderer;
+        renderer = nullptr;
         delete this->controller;
         this->controller = nullptr;
         active = false;
@@ -101,7 +101,8 @@ private:
         }
         source->process(app, source);
         if (app->destroyRequested) {
-          renderer->closeDisplay();
+          delete renderer;
+          renderer = nullptr;
           return;
         }
       }

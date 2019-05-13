@@ -9,9 +9,8 @@ class GameController;
 
 class Renderer {
 public:
-  virtual void initDisplay() = 0;
+  virtual ~Renderer() = default;
   virtual void drawFrame() = 0;
-  virtual void closeDisplay() = 0;
 
   virtual void faceDown(int card) = 0;
   virtual void faceUp(int card) = 0;

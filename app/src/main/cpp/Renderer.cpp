@@ -36,37 +36,6 @@ class LocalRenderer : public Renderer {
 public:
   explicit LocalRenderer(android_app *app) {
     this->app = app;
-  }
-
-private:
-  std::vector<Sprite *> cardSprites;
-  std::list<int> order;
-  std::set<int> draggable;
-  std::list<int> draggingCards;
-  std::vector<float> x;
-  std::vector<float> y;
-  std::vector<float> z;
-  std::list<PlaceHolder> placeHolders;
-
-  GLuint program;
-  GLuint texture;
-  GLint matrixId;
-  GLint textureSamplerId;
-  EGLDisplay display = nullptr;
-  EGLSurface surface;
-  EGLContext context;
-  EGLint width;
-  EGLint height;
-
-  DragHandler *dragHandler;
-
-  android_app *app;
-
-  ~LocalRenderer() = default;
-
-  void initDisplay() override {
-    assert(!display);
-
     display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
     eglInitialize(display, nullptr, nullptr);
 
@@ -126,12 +95,37 @@ private:
     }
   }
 
-  void closeDisplay() override {
-    for (Sprite* sprite: cardSprites) {
+private:
+  std::vector<Sprite *> cardSprites;
+  std::list<int> order;
+  std::set<int> draggable;
+  std::list<int> draggingCards;
+  std::vector<float> x;
+  std::vector<float> y;
+  std::vector<float> z;
+  std::list<PlaceHolder> placeHolders;
+
+  GLuint program;
+  GLuint texture;
+  GLint matrixId;
+  GLint textureSamplerId;
+  EGLDisplay display = nullptr;
+  EGLSurface surface;
+  EGLContext context;
+  EGLint width;
+  EGLint height;
+
+  DragHandler *dragHandler;
+
+  android_app *app;
+
+
+  ~LocalRenderer() {
+    for (Sprite *sprite: cardSprites) {
       delete sprite;
     }
 
-    for (PlaceHolder& placeHolder: placeHolders) {
+    for (PlaceHolder &placeHolder: placeHolders) {
       delete placeHolder.sprite;
     }
 
@@ -145,9 +139,7 @@ private:
       }
       eglTerminate(display);
     }
-    display = EGL_NO_DISPLAY;
-    context = EGL_NO_CONTEXT;
-    surface = EGL_NO_SURFACE;
+
   }
 
   void drawFrame() override {
@@ -177,7 +169,7 @@ private:
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    for (PlaceHolder& placeHolder: placeHolders) {
+    for (PlaceHolder &placeHolder: placeHolders) {
       glm::mat4 mvp2 = glm::translate(mvp, glm::vec3(placeHolder.x, placeHolder.y, 0));
       mvp2 = glm::scale(mvp2, glm::vec3(CARD_WIDTH, CARD_HEIGHT, 1));
       glUniformMatrix4fv(matrixId, 1, GL_FALSE, &mvp2[0][0]);
@@ -195,9 +187,8 @@ private:
   }
 
 
-
   void placeHolder(const int x, const int y, void (*onClick)()) override {
-    Sprite* sprite = newSprite();
+    Sprite *sprite = newSprite();
     _setBy(sprite, BLANK_ROW, PLACEHOLDER_COLUMN);
     placeHolders.push_back(PlaceHolder{sprite, (float) x, (float) y});
   }
