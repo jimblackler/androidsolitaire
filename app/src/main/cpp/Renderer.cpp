@@ -35,6 +35,7 @@ public:
 private:
   std::vector<Sprite *> sprites;
   std::list<int> order;
+  std::set<int> draggable;
   std::vector<float> x;
   std::vector<float> y;
   std::vector<float> z;
@@ -132,8 +133,9 @@ private:
     mvp = glm::scale(mvp, glm::vec3(1, -1, 1));
     mvp = glm::translate(mvp, glm::vec3(-1, -1, 0));
     mvp = glm::scale(mvp, glm::vec3(2, 2, 1));
+    float targetHeight = TARGET_WIDTH * (float) height / width;
     mvp = glm::scale(mvp, glm::vec3(1.0F / TARGET_WIDTH,
-                                    1.0F / TARGET_WIDTH * (float) width / height,
+                                    1.0F / targetHeight,
                                     1));
 
     glActiveTexture(GL_TEXTURE0);
@@ -205,6 +207,14 @@ private:
     this->z[cardNumber] = z;
   }
 
+  void setDraggable(int cardNumber, bool draggable) override {
+    if (draggable) {
+      this->draggable.insert(cardNumber);
+    } else {
+      this->draggable.erase(cardNumber);
+    }
+  }
+
   void raiseCard(int cardNumber) override {
     order.remove(cardNumber);
     order.push_back(cardNumber);
@@ -218,9 +228,41 @@ private:
     this->dragHandler = dragHandler;
   }
 
+  void press(float x, float y) override {
+    float targetHeight = TARGET_WIDTH * (float) height / width;
+    x = x / width * TARGET_WIDTH;
+    y = y / height * targetHeight;
+
+    for (auto it = order.rbegin(); it != order.rend(); it++) {
+      int cardNumber = *it;
+      if (x < this->x[cardNumber]) {
+        continue;
+      }
+      if (y < this->y[cardNumber]) {
+        continue;
+      }
+      if (x > this->x[cardNumber] + CARD_WIDTH) {
+        continue;
+      }
+      if (y > this->y[cardNumber] + CARD_HEIGHT) {
+        continue;
+      }
+
+      if (this->draggable.count(cardNumber)) {
+        this->x[cardNumber] = -500;
+        this->y[cardNumber] = -500;
+        break;
+      }
+
+    }
+
+  }
+
+
 };
 
 Renderer *newRenderer(android_app *app) {
   return new LocalRenderer(app);
 }
+
 

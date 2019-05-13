@@ -95,6 +95,7 @@ public:
       float t = MathUtils::toT(curve.startTime, curve.endTime, timeNow);
       if (t > 1) {
         renderer->positionCard(cardNumber, curve.endX, curve.endY, 0);
+        renderer->setDraggable(cardNumber, curve.draggable);
         curves.erase(it++);
       } else {
         float multiplier1 = sinf(t * (float) M_PI / 2);
@@ -255,6 +256,7 @@ public:
   void _placeCard(int cardNumber, float x, float y, bool draggable, int delay) {
     long long timeNow = getTimeNow();
     renderer->raiseCard(cardNumber);
+    renderer->setDraggable(cardNumber, false);
 
     std::vector<float> position = renderer->getCardPosition(cardNumber);
 

@@ -19,7 +19,6 @@ class LocalEngine : public Engine {
 public:
   explicit LocalEngine(android_app *app) {
     this->app = app;
-    sensorManager = ASensorManager_getInstance();
     if (app->savedState) {
       state = *(struct State *) app->savedState;  // TODO ... gameState into savedState
     }
@@ -34,15 +33,13 @@ private:
   GameController *controller;
   GameState *gameState;
   bool active;
-  ASensorManager *sensorManager;
   State state;
 
   int32_t handleInput(AInputEvent *event) override {
     if (AInputEvent_getType(event) != AINPUT_EVENT_TYPE_MOTION) {
       return 0;
     }
-    auto x = (int32_t) AMotionEvent_getX(event, 0);
-    auto y = (int32_t) AMotionEvent_getY(event, 0);
+    renderer->press(AMotionEvent_getX(event, 0), AMotionEvent_getY(event, 0));
     return 1;
   }
 
@@ -54,8 +51,6 @@ private:
           controller = newGameController(renderer, this->gameState);
           renderer->setDragHandler(this->controller);
           controller->render();
-          controller->animate();  // TODO ... required to do here?
-          renderer->drawFrame();  // TODO ... required to do here?
         }
         break;
       case APP_CMD_TERM_WINDOW:
@@ -68,8 +63,6 @@ private:
         break;
       case APP_CMD_LOST_FOCUS:
         active = false;
-        controller->animate();  // TODO ... required to do here?
-        renderer->drawFrame();  // TODO ... required to do here?
         break;
       case APP_CMD_SAVE_STATE:
         app->savedStateSize = sizeof(struct State);
