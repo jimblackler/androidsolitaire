@@ -24,7 +24,13 @@ const int TARGET_WIDTH = 820;
 
 const int BLANK_ROW = 4;
 const int CARDBACK_COLUMN = 0;
+const int PLACEHOLDER_COLUMN = 1;
 
+struct PlaceHolder {
+  Sprite *sprite;
+  float x;
+  float y;
+};
 
 class LocalRenderer : public Renderer {
 public:
@@ -33,12 +39,13 @@ public:
   }
 
 private:
-  std::vector<Sprite *> sprites;
+  std::vector<Sprite *> cardSprites;
   std::list<int> order;
   std::set<int> draggable;
   std::vector<float> x;
   std::vector<float> y;
   std::vector<float> z;
+  std::list<PlaceHolder> placeHolders;
 
   GLuint program;
   GLuint texture;
@@ -108,13 +115,13 @@ private:
     matrixId = glGetUniformLocation(program, "MVP");
     textureSamplerId = glGetUniformLocation(program, "textureSampler");
 
-    sprites.reserve(NUMBER_CARDS);
+    cardSprites.reserve(NUMBER_CARDS);
     x.reserve(NUMBER_CARDS);
     y.reserve(NUMBER_CARDS);
     z.reserve(NUMBER_CARDS);
     for (int cardNumber = 0; cardNumber < NUMBER_CARDS; cardNumber++) {
       order.push_back(cardNumber);
-      sprites[cardNumber] = newSprite();
+      cardSprites[cardNumber] = newSprite();
     }
   }
 
@@ -145,19 +152,30 @@ private:
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+    for (PlaceHolder& placeHolder: placeHolders) {
+      glm::mat4 mvp2 = glm::translate(mvp, glm::vec3(placeHolder.x, placeHolder.y, 0));
+      mvp2 = glm::scale(mvp2, glm::vec3(CARD_WIDTH, CARD_HEIGHT, 1));
+      glUniformMatrix4fv(matrixId, 1, GL_FALSE, &mvp2[0][0]);
+      placeHolder.sprite->draw();
+    }
+
     for (int cardNumber : order) {
       glm::mat4 mvp2 = glm::translate(mvp, glm::vec3(x[cardNumber], y[cardNumber], 0));
       mvp2 = glm::scale(mvp2, glm::vec3(CARD_WIDTH, CARD_HEIGHT, 1));
       glUniformMatrix4fv(matrixId, 1, GL_FALSE, &mvp2[0][0]);
-      sprites[cardNumber]->draw();
+      cardSprites[cardNumber]->draw();
     }
 
     eglSwapBuffers(display, surface);
   }
 
   void closeDisplay() override {
-    for (int cardNumber = 0; cardNumber < NUMBER_CARDS; cardNumber++) {
-      delete sprites[cardNumber];
+    for (Sprite* sprite: cardSprites) {
+      delete sprite;
+    }
+
+    for (PlaceHolder& placeHolder: placeHolders) {
+      delete placeHolder.sprite;
     }
 
     if (display != EGL_NO_DISPLAY) {
@@ -175,14 +193,17 @@ private:
     surface = EGL_NO_SURFACE;
   }
 
-
   void placeHolder(const int x, const int y, void (*onClick)()) override {
-
+    Sprite* sprite = newSprite();
+    _setBy(sprite, BLANK_ROW, PLACEHOLDER_COLUMN);
+    placeHolders.push_back(PlaceHolder{sprite, (float) x, (float) y});
   }
 
   void _setBy(int cardNumber, int suit, int type) {
-    Sprite *sprite = sprites[cardNumber];
+    _setBy(cardSprites[cardNumber], suit, type);
+  }
 
+  void _setBy(Sprite *sprite, int suit, int type) {
     float left = ((float) CARD_WIDTH * type) / TEXTURE_WIDTH;
     float right = ((float) CARD_WIDTH * type + CARD_WIDTH) / TEXTURE_WIDTH;
     float top = ((float) CARD_HEIGHT * suit) / TEXTURE_HEIGHT;
