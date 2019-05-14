@@ -19,7 +19,7 @@ static const auto TABLEAU_X = STOCK_X;
 static const auto TABLEAU_Y = 174;
 static const auto TABLEAU_X_SPACING = 110;
 static const auto TABLEAU_Y_SPACING_FACE_DOWN = 10;
-static const auto TABLEAU_Y_SPACING_FACE_UP = 18;
+static const auto TABLEAU_Y_SPACING_FACE_UP = 22;
 static const auto FOUNDATION_X = 338;
 static const auto FOUNDATION_X_SPACING = 110;
 static const auto FOUNDATION_Y = STOCK_Y;
@@ -201,8 +201,10 @@ public:
     }
 
     // Position tableau cards.
-    const std::vector<CardList> &tableausFaceDown = gameState->getTableausFaceDown();
-    const std::vector<CardList> &tableausFaceUp = gameState->getTableausFaceUp();
+    const std::vector<CardList> &tableausFaceDown =
+        gameState->getTableausFaceDown();
+    const std::vector<CardList> &tableausFaceUp =
+        gameState->getTableausFaceUp();
     for (int tableauIdx = 0; tableauIdx != NUMBER_TABLEAUS; tableauIdx++) {
       float position = TABLEAU_Y;
       const CardList &tableauFaceDown = tableausFaceDown[tableauIdx];

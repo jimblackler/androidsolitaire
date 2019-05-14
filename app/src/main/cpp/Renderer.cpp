@@ -142,7 +142,6 @@ private:
       }
       eglTerminate(display);
     }
-
   }
 
   void drawFrame() override {
@@ -177,12 +176,18 @@ private:
       placeHolder.sprite->draw();
     }
 
-    for (int cardNumber : order) {
-      glm::mat4 mvp2 =
-          glm::translate(mvp, {x[cardNumber], y[cardNumber], z[cardNumber]});
-      mvp2 = glm::scale(mvp2, {CARD_WIDTH, CARD_HEIGHT, 1});
-      glUniformMatrix4fv(matrixId, 1, GL_FALSE, &mvp2[0][0]);
-      cardSprites[cardNumber]->draw();
+    for (int pass = 0; pass < 2; pass++) {
+      for (int cardNumber : order) {
+        if ((pass == 0) != (z[cardNumber] == 0)) {
+          continue;
+        }
+        glm::mat4 mvp2 =
+            glm::translate(mvp, {x[cardNumber], y[cardNumber] - z[cardNumber],
+                                 0});
+        mvp2 = glm::scale(mvp2, {CARD_WIDTH, CARD_HEIGHT, 1});
+        glUniformMatrix4fv(matrixId, 1, GL_FALSE, &mvp2[0][0]);
+        cardSprites[cardNumber]->draw();
+      }
     }
 
     eglSwapBuffers(display, surface);
@@ -238,7 +243,7 @@ private:
   }
 
   std::vector<float> getCardPosition(int cardNumber) override {
-    return std::vector<float>{x[cardNumber], y[cardNumber], z[cardNumber]};
+    return {x[cardNumber], y[cardNumber], z[cardNumber]};
   }
 
   void setDragHandler(DragHandler *dragHandler) override {
@@ -323,5 +328,3 @@ private:
 Renderer *newRenderer(android_app *app) {
   return new LocalRenderer(app);
 }
-
-
