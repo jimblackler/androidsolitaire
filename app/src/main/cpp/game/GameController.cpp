@@ -13,15 +13,15 @@
 #include <map>
 #include <sys/time.h>
 
-static const auto STOCK_X = 8;
-static const auto STOCK_Y = 26;
+static const auto STOCK_X = 12;
+static const auto STOCK_Y = 28;
 static const auto TABLEAU_X = STOCK_X;
-static const auto TABLEAU_Y = 174;
-static const auto TABLEAU_X_SPACING = 110;
-static const auto TABLEAU_Y_SPACING_FACE_DOWN = 10;
+static const auto TABLEAU_Y = 180;
+static const auto TABLEAU_X_SPACING = 115;
+static const auto TABLEAU_Y_SPACING_FACE_DOWN = 14;
 static const auto TABLEAU_Y_SPACING_FACE_UP = 22;
 static const auto FOUNDATION_X = 338;
-static const auto FOUNDATION_X_SPACING = 110;
+static const auto FOUNDATION_X_SPACING = 115;
 static const auto FOUNDATION_Y = STOCK_Y;
 static const auto WASTE_X = 160;
 static const auto WASTE_X_SPACING = 22;
