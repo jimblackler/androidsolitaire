@@ -22,7 +22,7 @@ static const auto TABLEAU_Y_SPACING = 14;
 static const auto FOUNDATION_X = 338;
 static const auto FOUNDATION_X_SPACING = 110;
 static const auto FOUNDATION_Y = STOCK_Y;
-static const auto WASTE_X = 196;
+static const auto WASTE_X = 160;
 static const auto WASTE_X_SPACING = 22;
 static const auto WASTE_Y = STOCK_Y;
 static const auto RAISE_DURATION = 80;
@@ -71,18 +71,26 @@ public:
     }
 
     // Placeholder; stock
-    renderer->placeHolder(STOCK_X, STOCK_Y, []() {});
+    renderer->placeHolder(STOCK_X, STOCK_Y, [&]() { draw(); });
 
     // Placeholder; tableau
     for (int tableauIdx = 0; tableauIdx != NUMBER_TABLEAUS; tableauIdx++) {
-      renderer->placeHolder(TABLEAU_X + TABLEAU_X_SPACING * tableauIdx, TABLEAU_Y, []() {});
+      renderer->placeHolder(TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
+                            TABLEAU_Y, nullptr);
     }
 
     // Placeholder; foundation
-    for (int foundationIdx = 0; foundationIdx != NUMBER_FOUNDATIONS; foundationIdx++) {
-      renderer->placeHolder(FOUNDATION_X + FOUNDATION_X_SPACING * foundationIdx, FOUNDATION_Y,
-                            []() {});
+    for (int foundationIdx = 0; foundationIdx != NUMBER_FOUNDATIONS;
+         foundationIdx++) {
+      renderer->placeHolder(FOUNDATION_X + FOUNDATION_X_SPACING * foundationIdx,
+                            FOUNDATION_Y, nullptr);
     }
+  }
+
+  void draw() {
+    gameState->execute({MOVE_TYPE::DRAW, 0, 0});
+    // TODO. store
+    render();
   }
 
   void animate() override {
@@ -111,9 +119,9 @@ public:
         } else {
           v = curve.start[2] * (1 - t);
         }
-
-        renderer->positionCard(cardNumber, MathUtils::tInRange(curve.start[0], curve.endX, multiplier1),
-                               MathUtils::tInRange(curve.start[1], curve.endY, multiplier1), v);
+        float x = MathUtils::tInRange(curve.start[0], curve.endX, multiplier1);
+        float y = MathUtils::tInRange(curve.start[1], curve.endY, multiplier1);
+        renderer->positionCard(cardNumber, x, y, v);
         it++;
       }
     }
@@ -124,7 +132,8 @@ public:
       }
       for (int cardNumber : raisingCards) {
         std::vector<float> position = renderer->getCardPosition(cardNumber);
-        renderer->positionCard(cardNumber, position[0], position[1], RAISE_HEIGHT * t);
+        renderer->positionCard(cardNumber, position[0], position[1],
+                               RAISE_HEIGHT * t);
       }
       if (t == 1) {
         raisingCards.clear();
@@ -166,13 +175,15 @@ public:
       if (position < 0) {
         position = 0;
       }
-      _placeCard(cardNumber, WASTE_X + WASTE_X_SPACING * position, WASTE_Y, idx == wasteLength - 1,
+      _placeCard(cardNumber, WASTE_X + WASTE_X_SPACING * position, WASTE_Y,
+                 idx == wasteLength - 1,
                  delay);
     }
 
     // Position foundation cards.
     auto foundations = gameState->getFoundations();
-    for (int foundationIdx = 0; foundationIdx != NUMBER_FOUNDATIONS; foundationIdx++) {
+    for (int foundationIdx = 0; foundationIdx != NUMBER_FOUNDATIONS;
+         foundationIdx++) {
       CardList &foundation = foundations[foundationIdx];
       int foundationLength = foundation.length();
 
@@ -183,7 +194,8 @@ public:
         if (position == foundationLength - 1) {
           std::list<int> cards{cardNumber};
         }
-        _placeCard(cardNumber, FOUNDATION_X + FOUNDATION_X_SPACING * foundationIdx,
+        _placeCard(cardNumber,
+                   FOUNDATION_X + FOUNDATION_X_SPACING * foundationIdx,
                    FOUNDATION_Y, true, 0);
       }
     }
@@ -207,7 +219,8 @@ public:
         int cardNumber = tableau.get(position);
         renderer->faceUp(cardNumber);
         _placeCard(cardNumber, TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
-                   TABLEAU_Y + TABLEAU_Y_SPACING * (position + faceDownLength), true, 0);
+                   TABLEAU_Y + TABLEAU_Y_SPACING * (position + faceDownLength),
+                   true, 0);
       }
     }
 
@@ -306,8 +319,9 @@ public:
         // Filter actions to oldest actions.
         long long oldest = LLONG_MAX;
         std::set<Action> oldestActions;
-        for (const Action& action : actions) {
-          long long time = cardHistory.find(action) == cardHistory.end() ? LLONG_MIN : cardHistory[action];
+        for (const Action &action : actions) {
+          long long time =
+              cardHistory.count(action) ? cardHistory[action] : LLONG_MIN;
           if (time == oldest) {
             oldestActions.insert(action);
           } else if (time < oldest) {
@@ -322,7 +336,7 @@ public:
         // Filter actions to most useful actions.
         int mostUseful = INT_MIN;
         std::set<Action> mostUsefulActions;
-        for (const Action& action : actions) {
+        for (const Action &action : actions) {
           auto useful = action.moveType;
           if (useful == mostUseful) {
             mostUsefulActions.insert(action);
@@ -341,15 +355,16 @@ public:
       auto tableausFaceDown = gameState->getTableausFaceDown();
       auto position = renderer->getCardPosition(cardNumber);
       double closest = DBL_MAX;
-      const Action * closestAction = nullptr;
-      for (const Action& action : actions) {
+      const Action *closestAction = nullptr;
+      for (const Action &action : actions) {
         if (cards.size() == 1 || action.moveType == MOVE_TYPE::TO_TABLEAU) {
           float x;
           float y;
           if (action.moveType == MOVE_TYPE::TO_TABLEAU) {
             x = TABLEAU_X + TABLEAU_X_SPACING * action.destinationIdx;
             y = TABLEAU_Y + (tableausFaceUp[action.destinationIdx].length() +
-                             tableausFaceDown[action.destinationIdx].length()) * TABLEAU_Y_SPACING;
+                             tableausFaceDown[action.destinationIdx].length())
+                            * TABLEAU_Y_SPACING;
           } else {
             assert (action.moveType == MOVE_TYPE::TO_FOUNDATION);
             x = FOUNDATION_X + FOUNDATION_X_SPACING * action.destinationIdx;
@@ -369,11 +384,8 @@ public:
         //GameStore.store(gameState);
       }
     }
-
     this->render();
   }
-
-
 };
 
 GameController *newGameController(Renderer *renderer, GameState *gameState) {

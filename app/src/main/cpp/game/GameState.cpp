@@ -55,11 +55,11 @@ class LocalGameState : public GameState {
     // In tableau cards?
     for (int tableauIdx = 0; tableauIdx != NUMBER_TABLEAUS;
          tableauIdx++) {
-      auto tableau = tableausFaceUp[tableauIdx];
+      CardList &tableau = tableausFaceUp[tableauIdx];
       if (tableau.remove(cardNumber)) {
         // Reveal undercard if needed.
         if (tableau.length() == 0) {
-          auto tableauFaceDown = tableausFaceDown[tableauIdx];
+          CardList &tableauFaceDown = tableausFaceDown[tableauIdx];
           if (tableauFaceDown.length() > 0) {
             tableau.pushFront(tableauFaceDown.pop());
           }
@@ -91,7 +91,7 @@ class LocalGameState : public GameState {
     // In tableau cards?
     for (int tableauIdx = 0; tableauIdx != NUMBER_TABLEAUS;
          tableauIdx++) {
-      auto tableau = tableausFaceUp[tableauIdx];
+      CardList &tableau = tableausFaceUp[tableauIdx];
       int idx = tableau.indexOf(cardNumber);
       if (idx != -1 && idx < tableau.length() - 1) {
         return tableau.get(idx + 1);
@@ -129,12 +129,16 @@ class LocalGameState : public GameState {
   }
 
   void execute(const Action &action) override {
-    if (action.moveType == MOVE_TYPE::DRAW) {
-      _draw();
-    } else if (action.moveType == MOVE_TYPE::TO_TABLEAU) {
-      _moveToTableau(action.card, action.destinationIdx);
-    } else if (action.moveType == MOVE_TYPE::TO_FOUNDATION) {
-      _moveToFoundation(action.card, action.destinationIdx);
+    switch (action.moveType) {
+      case MOVE_TYPE::DRAW:
+        _draw();
+        break;
+      case MOVE_TYPE::TO_TABLEAU:
+        _moveToTableau(action.card, action.destinationIdx);
+        break;
+      case MOVE_TYPE::TO_FOUNDATION:
+        _moveToFoundation(action.card, action.destinationIdx);
+        break;
     }
   }
 
@@ -183,7 +187,6 @@ class LocalGameState : public GameState {
     std::map<int, std::set<Action>> actionsFor;
     std::set<int> movableCards = getMovableCards();
 
-
     for (int foundationIdx = 0; foundationIdx != NUMBER_FOUNDATIONS;
          foundationIdx++) {
       auto foundation = foundations[foundationIdx];
@@ -201,18 +204,14 @@ class LocalGameState : public GameState {
       }
 
       for (auto other : canPlaceOn) {
-        Action action;
-        action.card = other;
-        action.moveType = MOVE_TYPE::TO_FOUNDATION;
-        action.destinationIdx = foundationIdx;
-        int card = action.card;
-        if (movableCards.find(card) == movableCards.end()) {
+        if (!movableCards.count(other)) {
           continue;
         }
-        if (actionsFor.find(card) == actionsFor.end()) {
-          actionsFor[card] = std::set<Action>();
+        if (!actionsFor.count(other)) {
+          actionsFor[other] = std::set<Action>();
         }
-        actionsFor[card].insert(action);
+        actionsFor[other].insert(
+            {MOVE_TYPE::TO_FOUNDATION, other, foundationIdx});
       }
     }
 
@@ -224,27 +223,22 @@ class LocalGameState : public GameState {
       std::list<int> canPlaceOn;
       if (tableauLength == 0) {
         // Empty tableau ... will take Kings
-        canPlaceOn = std::list<int>{Rules::getCard(0, KING_TYPE),
-                                    Rules::getCard(1, KING_TYPE),
-                                    Rules::getCard(2, KING_TYPE),
-                                    Rules::getCard(3, KING_TYPE)};
+        canPlaceOn = {Rules::getCard(0, KING_TYPE),
+                      Rules::getCard(1, KING_TYPE),
+                      Rules::getCard(2, KING_TYPE),
+                      Rules::getCard(3, KING_TYPE)};
       } else {
         int cardNumber = tableau.get(tableauLength - 1);
         canPlaceOn = Rules::canPlaceOnInTableau(cardNumber);
       }
       for (auto other : canPlaceOn) {
-        Action action;
-        action.card = other;
-        action.moveType = MOVE_TYPE::TO_TABLEAU;
-        action.destinationIdx = tableauIdx;
-        int card = action.card;
-        if (movableCards.find(card) == movableCards.end()) {
+        if (!movableCards.count(other)) {
           continue;
         }
-        if (actionsFor.find(card) == actionsFor.end()) {
-          actionsFor[card] = std::set<Action>();
+        if (!actionsFor.count(other)) {
+          actionsFor[other] = std::set<Action>();
         }
-        actionsFor[card].insert(action);
+        actionsFor[other].insert({MOVE_TYPE::TO_TABLEAU, other, tableauIdx});
       }
     }
     return actionsFor;
@@ -254,10 +248,7 @@ class LocalGameState : public GameState {
     auto actionsFor = getActions();
     auto actions = std::set<Action>();
     {
-      Action action;
-      action.moveType = MOVE_TYPE::DRAW;
-      action.card = 0;
-      action.destinationIdx = 0;
+      Action action{MOVE_TYPE::DRAW, 0, 0};
       actions.insert(action);
     }
     for (const auto &pair : actionsFor) {

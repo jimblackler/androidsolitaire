@@ -6,13 +6,11 @@
 #include <android/sensor.h>
 #include <memory>
 
-
 #define ALOGI(...) __android_log_print(ANDROID_LOG_ERROR, "Engine", __VA_ARGS__)
 
 struct State {
   bool placeholder;
 };
-
 
 class LocalEngine : public Engine {
 

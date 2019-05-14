@@ -30,6 +30,7 @@ struct PlaceHolder {
   Sprite *sprite;
   float x;
   float y;
+  std::function<void()> onClick;
 };
 
 class LocalRenderer : public Renderer {
@@ -189,10 +190,10 @@ private:
   }
 
 
-  void placeHolder(const int x, const int y, void (*onClick)()) override {
+  void placeHolder(const int x, const int y, std::function<void()> onClick) override {
     Sprite *sprite = newSprite();
     _setBy(sprite, BLANK_ROW, PLACEHOLDER_COLUMN);
-    placeHolders.push_back(PlaceHolder{sprite, (float) x, (float) y});
+    placeHolders.push_back(PlaceHolder{sprite, (float) x, (float) y, onClick});
   }
 
   void _setBy(int cardNumber, int suit, int type) {
@@ -277,7 +278,25 @@ private:
             break;
           }
         }
-
+        for (const PlaceHolder &placeHolder: placeHolders) {
+          if (!placeHolder.onClick) {
+            continue;
+          }
+          if (x < placeHolder.x) {
+            continue;
+          }
+          if (y < placeHolder.y) {
+            continue;
+          }
+          if (x > placeHolder.x + CARD_WIDTH) {
+            continue;
+          }
+          if (y > placeHolder.y + CARD_HEIGHT) {
+            continue;
+          }
+          placeHolder.onClick();
+          break;
+        }
         break;
       case AMOTION_EVENT_ACTION_MOVE:
         click = false;

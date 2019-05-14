@@ -1,3 +1,4 @@
+#include <random>
 #include <vector>
 
 class CardList {
@@ -51,6 +52,7 @@ public:
   }
 
   void shuffle() {
-    std::random_shuffle(cards.begin(), cards.end());
+    std::mt19937 generator{3};
+    std::shuffle(cards.begin(), cards.end(), generator);
   }
 };

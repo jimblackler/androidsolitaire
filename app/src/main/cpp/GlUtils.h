@@ -3,5 +3,5 @@
 #include <android/asset_manager.h>
 
 extern bool checkGlError(const char *funcName);
-GLuint loadProgram(const char*vertexShaderFilename,
-                   const char*fragmentShaderFilename, AAssetManager * assetManager);
+GLuint loadProgram(const char *vertexShaderFilename,
+                   const char *fragmentShaderFilename, AAssetManager *assetManager);
