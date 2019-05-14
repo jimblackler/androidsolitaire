@@ -1,6 +1,8 @@
+#pragma once
+
 enum MOVE_TYPE {
   DRAW,
-  TO_TABLEU,
+  TO_TABLEAU,
   TO_FOUNDATION,
 };
 

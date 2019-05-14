@@ -244,43 +244,58 @@ private:
     this->dragHandler = dragHandler;
   }
 
-  void press(float x, float y) override {
+  void motionEvent(int type, float x, float y) override {
     float targetHeight = TARGET_WIDTH * (float) height / width;
     x = x / width * TARGET_WIDTH;
     y = y / height * targetHeight;
 
-    if (this->draggingCards.empty()) {
-      for (auto it = order.rbegin(); it != order.rend(); it++) {
-        int cardNumber = *it;
-        if (x < this->x[cardNumber]) {
-          continue;
-        }
-        if (y < this->y[cardNumber]) {
-          continue;
-        }
-        if (x > this->x[cardNumber] + CARD_WIDTH) {
-          continue;
-        }
-        if (y > this->y[cardNumber] + CARD_HEIGHT) {
-          continue;
-        }
+    switch (type) {
+      case AMOTION_EVENT_ACTION_DOWN:
+        if (this->draggingCards.empty()) {
+          for (auto it = order.rbegin(); it != order.rend(); it++) {
+            int cardNumber = *it;
+            if (x < this->x[cardNumber]) {
+              continue;
+            }
+            if (y < this->y[cardNumber]) {
+              continue;
+            }
+            if (x > this->x[cardNumber] + CARD_WIDTH) {
+              continue;
+            }
+            if (y > this->y[cardNumber] + CARD_HEIGHT) {
+              continue;
+            }
 
-        if (this->draggable.count(cardNumber)) {
-          std::list<int> cards = dragHandler->startDrag(cardNumber);
-          //this.click = true;
-          this->draggingCards = cards;
-          for (int draggingCard : draggingCards) {
-            this->raiseCard(draggingCard);
+            if (this->draggable.count(cardNumber)) {
+              std::list<int> cards = dragHandler->startDrag(cardNumber);
+              //this.click = true;
+              this->draggingCards = cards;
+              for (int draggingCard : draggingCards) {
+                this->raiseCard(draggingCard);
+              }
+              break;
+            }
           }
-          break;
         }
-      }
-    } else {
-      for (int cardNumber : draggingCards) {
-        this->x[cardNumber] += x - previousX;
-        this->y[cardNumber] += y - previousY;
-      }
+        break;
+      case AMOTION_EVENT_ACTION_MOVE:
+        for (int cardNumber : draggingCards) {
+          this->x[cardNumber] += x - previousX;
+          this->y[cardNumber] += y - previousY;
+        }
+        break;
+      case AMOTION_EVENT_ACTION_UP:
+        if (!draggingCards.empty()) {
+          int firstCard = draggingCards.front();
+          dragHandler->cardClickedOrDropped(firstCard, false);
+          draggingCards.clear();
+        }
+        break;
+      default:
+        break;
     }
+
 
     previousX = x;
     previousY = y;

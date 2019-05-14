@@ -1,8 +1,11 @@
+#include "GameController.h"
+
+#include "Action.h"
 #include "GameState.h"
 #include "MathUtils.h"
 #include "Rules.h"
 #include "DragHandler.h"
-#include "GameController.h"
+
 #include "../Renderer.h"
 
 #include <algorithm>
@@ -13,7 +16,7 @@
 static const auto STOCK_X = 8;
 static const auto STOCK_Y = 26;
 static const auto TABLEAU_X = STOCK_X;
-static const auto TABLEAU_Y = 180;
+static const auto TABLEAU_Y = 174;
 static const auto TABLEAU_X_SPACING = 110;
 static const auto TABLEAU_Y_SPACING = 14;
 static const auto FOUNDATION_X = 338;
@@ -53,7 +56,7 @@ class LocalGameController : public GameController {
 public:
   Renderer *renderer;
   std::map<int, Curve> curves;
-  std::map<int, int> cardHistory;
+  std::map<Action, long long> cardHistory;
   float riseStarted;
   std::list<int> raisingCards;
   int lastCardMoved = -1;
@@ -286,87 +289,88 @@ public:
     return cards;
   }
 
-  void cardClickedOrDropped(int card, bool click) {
-//    const gameState = this.gameState;
-//    const cards = gameState.getStack(card);
-//    const cardNumber = cards[0];
-//    if (this.lastCardMoved !== cardNumber) {
-//      this.cardHistory = new Map();
-//      this.lastCardMoved = cardNumber;
-//    }
-//    const actionsFor = gameState.getActions();
-//    let actions = actionsFor.get(cardNumber);
-//
-//    if (actions) {
-//      // if click ... priority is (age-> usefulness -> proximity)
-//      // otherwise it is proximity
-//      if (click) {
-//        // Filter actions to oldest actions.
-//        let oldest = Number.MAX_VALUE;
-//        let oldestActions = [];
-//        for (const action of actions) {
-//          const actionKey = JSON.stringify(action);
-//          const time = this.cardHistory.has(actionKey) ? this.cardHistory.get(actionKey) : Number.MIN_VALUE;
-//          if (time === oldest) {
-//            oldestActions.push(action);
-//          } else if (time < oldest) {
-//            oldest = time;
-//            oldestActions = [action];
-//          }
-//        }
-//        if (oldestActions) {
-//          actions = oldestActions;
-//        }
-//
-//        // Filter actions to most useful actions.
-//        let mostUseful = Number.MIN_VALUE;
-//        let mostUsefulActions = [];
-//        for (const action of actions) {
-//          const useful = action.moveType;
-//          if (useful === mostUseful) {
-//            mostUsefulActions.push(action);
-//          } else if (useful > mostUseful) {
-//            mostUseful = useful;
-//            mostUsefulActions = [action];
-//          }
-//        }
-//        if (mostUsefulActions) {
-//          actions = mostUsefulActions;
-//        }
-//      }
-//
-//      // Find closet action.
-//      const position = this.renderer.getCardPosition(cardNumber);
-//      let closest = Number.MAX_VALUE;
-//      let closestAction;
-//      for (const action of actions) {
-//        if (cards.length === 1 || action.moveType === MOVE_TYPE.TO_TABLEAU) {
-//          let x;
-//          let y;
-//          if (action.moveType === MOVE_TYPE.TO_TABLEAU) {
-//            x = TABLEAU_X + TABLEAU_X_SPACING * action.destinationIdx;
-//            y = TABLEAU_Y + (gameState.tableausFaceUp[action.destinationIdx].length() +
-//                             gameState.tableausFaceDown[action.destinationIdx].length()) * TABLEAU_Y_SPACING;
-//          } else if (action.moveType === MOVE_TYPE.TO_FOUNDATION) {
-//            x = FOUNDATION_X + FOUNDATION_X_SPACING * action.destinationIdx;
-//            y = FOUNDATION_Y;
-//          }
-//
-//          const distance = Math.pow(position[0] - x, 2) + Math.pow(position[1] - y, 2);
-//          if (distance < closest) {
-//            closest = distance;
-//            closestAction = action;
-//          }
-//        }
-//      }
-//      if (closestAction) {
-//        this.cardHistory.set(JSON.stringify(closestAction), new Date().getTime());
-//        gameState.execute(closestAction);
-//        GameStore.store(gameState);
-//      }
-//    }
-//
-//    this.render();
+  void cardClickedOrDropped(int card, bool click) override {
+    std::list<int> cards = gameState->getStack(card);
+    int cardNumber = cards.front();
+    if (lastCardMoved != cardNumber) {
+      cardHistory.clear();
+      lastCardMoved = cardNumber;
+    }
+    std::map<int, std::set<Action>> actionsFor = gameState->getActions();
+    std::set<Action> actions = actionsFor[cardNumber];
+
+    if (!actions.empty()) {
+      // if click ... priority is (age-> usefulness -> proximity)
+      // otherwise it is proximity
+      if (click) {
+        // Filter actions to oldest actions.
+        long long oldest = LLONG_MAX;
+        std::set<Action> oldestActions;
+        for (const Action& action : actions) {
+          long long time = cardHistory.find(action) == cardHistory.end() ? LLONG_MIN : cardHistory[action];
+          if (time == oldest) {
+            oldestActions.insert(action);
+          } else if (time < oldest) {
+            oldest = time;
+            oldestActions = {action};
+          }
+        }
+        if (!oldestActions.empty()) {
+          actions = oldestActions;
+        }
+
+        // Filter actions to most useful actions.
+        int mostUseful = INT_MIN;
+        std::set<Action> mostUsefulActions;
+        for (const Action& action : actions) {
+          auto useful = action.moveType;
+          if (useful == mostUseful) {
+            mostUsefulActions.insert(action);
+          } else if (useful > mostUseful) {
+            mostUseful = useful;
+            mostUsefulActions = {action};
+          }
+        }
+        if (!mostUsefulActions.empty()) {
+          actions = mostUsefulActions;
+        }
+      }
+
+      // Find closet action.
+      auto tableausFaceUp = gameState->getTableausFaceUp();
+      auto tableausFaceDown = gameState->getTableausFaceDown();
+      auto position = renderer->getCardPosition(cardNumber);
+      double closest = DBL_MAX;
+      const Action * closestAction = nullptr;
+      for (const Action& action : actions) {
+        if (cards.size() == 1 || action.moveType == MOVE_TYPE::TO_TABLEAU) {
+          float x;
+          float y;
+          if (action.moveType == MOVE_TYPE::TO_TABLEAU) {
+            x = TABLEAU_X + TABLEAU_X_SPACING * action.destinationIdx;
+            y = TABLEAU_Y + (tableausFaceUp[action.destinationIdx].length() +
+                             tableausFaceDown[action.destinationIdx].length()) * TABLEAU_Y_SPACING;
+          } else {
+            assert (action.moveType == MOVE_TYPE::TO_FOUNDATION);
+            x = FOUNDATION_X + FOUNDATION_X_SPACING * action.destinationIdx;
+            y = FOUNDATION_Y;
+          }
+
+          auto distance = pow(position[0] - x, 2) + pow(position[1] - y, 2);
+          if (distance < closest) {
+            closest = distance;
+            closestAction = &action;
+          }
+        }
+      }
+      if (closestAction) {
+        cardHistory[*closestAction] = getTimeNow();
+        gameState->execute(*closestAction);
+        //GameStore.store(gameState);
+      }
+    }
+
+    this->render();
   }
 
 

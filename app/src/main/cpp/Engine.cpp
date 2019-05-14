@@ -39,7 +39,20 @@ private:
     if (AInputEvent_getType(event) != AINPUT_EVENT_TYPE_MOTION) {
       return 0;
     }
-    renderer->press(AMotionEvent_getX(event, 0), AMotionEvent_getY(event, 0));
+
+    auto action = AMotionEvent_getAction(event);
+    auto flags = action & AMOTION_EVENT_ACTION_MASK;
+    switch (flags) {
+      case AMOTION_EVENT_ACTION_MOVE:
+      case AMOTION_EVENT_ACTION_DOWN:
+      case AMOTION_EVENT_ACTION_UP:
+        renderer->motionEvent(flags, AMotionEvent_getX(event, 0),
+                              AMotionEvent_getY(event, 0));
+        break;
+      default:
+        break;
+    }
+
     return 1;
   }
 

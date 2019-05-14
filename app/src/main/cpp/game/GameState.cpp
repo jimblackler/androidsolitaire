@@ -128,10 +128,10 @@ class LocalGameState : public GameState {
     }
   }
 
-  void execute(const Action &action) {
+  void execute(const Action &action) override {
     if (action.moveType == MOVE_TYPE::DRAW) {
       _draw();
-    } else if (action.moveType == MOVE_TYPE::TO_TABLEU) {
+    } else if (action.moveType == MOVE_TYPE::TO_TABLEAU) {
       _moveToTableau(action.card, action.destinationIdx);
     } else if (action.moveType == MOVE_TYPE::TO_FOUNDATION) {
       _moveToFoundation(action.card, action.destinationIdx);
@@ -179,7 +179,7 @@ class LocalGameState : public GameState {
     return true;
   }
 
-  std::map<int, std::set<Action>> getActions() {
+  std::map<int, std::set<Action>> getActions() override {
     std::map<int, std::set<Action>> actionsFor;
     std::set<int> movableCards = getMovableCards();
 
@@ -235,7 +235,7 @@ class LocalGameState : public GameState {
       for (auto other : canPlaceOn) {
         Action action;
         action.card = other;
-        action.moveType = MOVE_TYPE::TO_TABLEU;
+        action.moveType = MOVE_TYPE::TO_TABLEAU;
         action.destinationIdx = tableauIdx;
         int card = action.card;
         if (movableCards.find(card) == movableCards.end()) {
