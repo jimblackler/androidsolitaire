@@ -157,13 +157,11 @@ private:
     glUseProgram(program);
 
     glm::mat4 mvp = glm::mat4();
-    mvp = glm::scale(mvp, glm::vec3(1, -1, 1));
-    mvp = glm::translate(mvp, glm::vec3(-1, -1, 0));
-    mvp = glm::scale(mvp, glm::vec3(2, 2, 1));
+    mvp = glm::scale(mvp, {1, -1, 1});
+    mvp = glm::translate(mvp, {-1, -1, 0});
+    mvp = glm::scale(mvp, {2, 2, 1});
     float targetHeight = TARGET_WIDTH * (float) height / width;
-    mvp = glm::scale(mvp, glm::vec3(1.0F / TARGET_WIDTH,
-                                    1.0F / targetHeight,
-                                    1));
+    mvp = glm::scale(mvp, {1.0F / TARGET_WIDTH, 1.0F / targetHeight, 1});
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);
@@ -173,15 +171,16 @@ private:
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     for (PlaceHolder &placeHolder: placeHolders) {
-      glm::mat4 mvp2 = glm::translate(mvp, glm::vec3(placeHolder.x, placeHolder.y, 0));
-      mvp2 = glm::scale(mvp2, glm::vec3(CARD_WIDTH, CARD_HEIGHT, 1));
+      glm::mat4 mvp2 = glm::translate(mvp, {placeHolder.x, placeHolder.y, 0});
+      mvp2 = glm::scale(mvp2, {CARD_WIDTH, CARD_HEIGHT, 1});
       glUniformMatrix4fv(matrixId, 1, GL_FALSE, &mvp2[0][0]);
       placeHolder.sprite->draw();
     }
 
     for (int cardNumber : order) {
-      glm::mat4 mvp2 = glm::translate(mvp, glm::vec3(x[cardNumber], y[cardNumber], 0));
-      mvp2 = glm::scale(mvp2, glm::vec3(CARD_WIDTH, CARD_HEIGHT, 1));
+      glm::mat4 mvp2 =
+          glm::translate(mvp, {x[cardNumber], y[cardNumber], z[cardNumber]});
+      mvp2 = glm::scale(mvp2, {CARD_WIDTH, CARD_HEIGHT, 1});
       glUniformMatrix4fv(matrixId, 1, GL_FALSE, &mvp2[0][0]);
       cardSprites[cardNumber]->draw();
     }
@@ -189,8 +188,8 @@ private:
     eglSwapBuffers(display, surface);
   }
 
-
-  void placeHolder(const int x, const int y, std::function<void()> onClick) override {
+  void placeHolder(const int x, const int y, std::function<void()> onClick)
+  override {
     Sprite *sprite = newSprite();
     _setBy(sprite, BLANK_ROW, PLACEHOLDER_COLUMN);
     placeHolders.push_back(PlaceHolder{sprite, (float) x, (float) y, onClick});

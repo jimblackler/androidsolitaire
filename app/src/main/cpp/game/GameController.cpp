@@ -72,7 +72,6 @@ public:
     }
 
     // Placeholder; stock
-
     renderer->placeHolder(STOCK_X, STOCK_Y, [this]() { this->draw(); });
 
     // Placeholder; tableau
