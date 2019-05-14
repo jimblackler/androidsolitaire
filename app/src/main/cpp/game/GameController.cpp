@@ -27,13 +27,13 @@ static const auto WASTE_X = 160;
 static const auto WASTE_X_SPACING = 22;
 static const auto WASTE_Y = STOCK_Y;
 static const auto RAISE_DURATION = 80;
-static const auto RAISE_HEIGHT = 8;
+static const auto RAISE_HEIGHT = 14;
 static const auto ANIMATION_TIME = 400;
 static const auto ANIMATION_DISTANCE_MAX = 800;
 static const auto ANIMATION_TIME_SUPPLEMENT = 125;
 static const auto WASTE_DRAW_STAGGER = 20;
 static const auto ANIMATION_TEST_SLOWDOWN = 1;
-static const auto FLY_HEIGHT = 30;
+static const auto FLY_HEIGHT = 45;
 static const auto FLY_DISTANCE_MAX = 800;
 
 struct Curve {
@@ -58,7 +58,7 @@ public:
   Renderer *renderer;
   std::map<int, Curve> curves;
   std::map<Action, long long> cardHistory;
-  float riseStarted;
+  long long riseStarted;
   std::list<int> raisingCards;
   int lastCardMoved = -1;
   GameState *gameState;
@@ -128,7 +128,7 @@ public:
       }
     }
     if (!raisingCards.empty()) {
-      float t = (timeNow - riseStarted) / RAISE_DURATION;
+      float t = (float) (timeNow - riseStarted) / RAISE_DURATION;
       if (t > 1) {
         t = 1;
       }
@@ -288,9 +288,9 @@ public:
     curve.startTime = timeNow + delay;
     curve.endTime = timeNow + animationTime + delay;
     curve.start = position;
+    curve.flyHeight = flyHeight;
     curve.endX = x;
     curve.endY = y;
-    curve.flyHeight = flyHeight;
     curve.draggable = draggable;
     curves[cardNumber] = curve;
   }
