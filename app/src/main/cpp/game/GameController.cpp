@@ -18,7 +18,8 @@ static const auto STOCK_Y = 26;
 static const auto TABLEAU_X = STOCK_X;
 static const auto TABLEAU_Y = 174;
 static const auto TABLEAU_X_SPACING = 110;
-static const auto TABLEAU_Y_SPACING = 14;
+static const auto TABLEAU_Y_SPACING_FACE_DOWN = 10;
+static const auto TABLEAU_Y_SPACING_FACE_UP = 18;
 static const auto FOUNDATION_X = 338;
 static const auto FOUNDATION_X_SPACING = 110;
 static const auto FOUNDATION_Y = STOCK_Y;
@@ -71,7 +72,8 @@ public:
     }
 
     // Placeholder; stock
-    renderer->placeHolder(STOCK_X, STOCK_Y, [&]() { draw(); });
+
+    renderer->placeHolder(STOCK_X, STOCK_Y, [this]() { this->draw(); });
 
     // Placeholder; tableau
     for (int tableauIdx = 0; tableauIdx != NUMBER_TABLEAUS; tableauIdx++) {
@@ -101,6 +103,7 @@ public:
       auto cardNumber = pair.first;
       auto curve = pair.second;
       if (timeNow < curve.startTime) {
+        it++;
         continue;
       }
       float t = MathUtils::toT(curve.startTime, curve.endTime, timeNow);
@@ -145,14 +148,14 @@ public:
   void render() override {
     // Stop all animations immediately (old onArrive functions are invalid)
     for (const auto &pair : curves) {
-      auto k = pair.first;
-      auto curve = pair.second;
-      renderer->positionCard(k, curve.endX, curve.endY, 0);
+      int cardNumber = pair.first;
+      const Curve &curve = pair.second;
+      renderer->positionCard(cardNumber, curve.endX, curve.endY, 0);
     }
     curves.clear();
 
     // Position stock cards.
-    auto stock = gameState->getStock();
+    const CardList &stock = gameState->getStock();
     int stockLength = stock.length();
 
     for (int idx = 0; idx != stockLength; idx++) {
@@ -162,7 +165,7 @@ public:
     }
 
     // Position waste cards.
-    auto waste = gameState->getWaste();
+    const CardList &waste = gameState->getWaste();
     int wasteLength = waste.length();
     for (int idx = 0; idx != wasteLength; idx++) {
       int cardNumber = waste.get(idx);
@@ -176,21 +179,19 @@ public:
         position = 0;
       }
       _placeCard(cardNumber, WASTE_X + WASTE_X_SPACING * position, WASTE_Y,
-                 idx == wasteLength - 1,
-                 delay);
+                 idx == wasteLength - 1, delay);
     }
 
     // Position foundation cards.
     auto foundations = gameState->getFoundations();
     for (int foundationIdx = 0; foundationIdx != NUMBER_FOUNDATIONS;
          foundationIdx++) {
-      CardList &foundation = foundations[foundationIdx];
+      const CardList &foundation = foundations[foundationIdx];
       int foundationLength = foundation.length();
 
       for (int position = 0; position < foundationLength; position++) {
         int cardNumber = foundation.get(position);
         renderer->faceUp(cardNumber);
-        void (*onArrive)();
         if (position == foundationLength - 1) {
           std::list<int> cards{cardNumber};
         }
@@ -201,26 +202,24 @@ public:
     }
 
     // Position tableau cards.
-    auto tableausFaceDown = gameState->getTableausFaceDown();
-    auto tableausFaceUp = gameState->getTableausFaceUp();
+    const std::vector<CardList> &tableausFaceDown = gameState->getTableausFaceDown();
+    const std::vector<CardList> &tableausFaceUp = gameState->getTableausFaceUp();
     for (int tableauIdx = 0; tableauIdx != NUMBER_TABLEAUS; tableauIdx++) {
-      auto tableau = tableausFaceDown[tableauIdx];
-      int faceDownLength = tableau.length();
-      for (int position = 0; position < faceDownLength; position++) {
-        int cardNumber = tableau.get(position);
+      float position = TABLEAU_Y;
+      const CardList &tableauFaceDown = tableausFaceDown[tableauIdx];
+      int faceDownLength = tableauFaceDown.length();
+      for (int cardNumber: tableauFaceDown.asArray()) {
         _placeCard(cardNumber, TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
-                   TABLEAU_Y + TABLEAU_Y_SPACING * position, false, 0);
+                   position, false, 0);
         renderer->faceDown(cardNumber);
+        position += TABLEAU_Y_SPACING_FACE_DOWN;
       }
-      tableau = tableausFaceUp[tableauIdx];
-      int tableauLength = tableau.length();
-
-      for (int position = 0; position < tableauLength; position++) {
-        int cardNumber = tableau.get(position);
-        renderer->faceUp(cardNumber);
+      const CardList &tableauFaceUp = tableausFaceUp[tableauIdx];
+      for (int cardNumber: tableauFaceUp.asArray()) {
         _placeCard(cardNumber, TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
-                   TABLEAU_Y + TABLEAU_Y_SPACING * (position + faceDownLength),
-                   true, 0);
+                   position, true, 0);
+        renderer->faceUp(cardNumber);
+        position += TABLEAU_Y_SPACING_FACE_UP;
       }
     }
 
@@ -362,9 +361,10 @@ public:
           float y;
           if (action.moveType == MOVE_TYPE::TO_TABLEAU) {
             x = TABLEAU_X + TABLEAU_X_SPACING * action.destinationIdx;
-            y = TABLEAU_Y + (tableausFaceUp[action.destinationIdx].length() +
-                             tableausFaceDown[action.destinationIdx].length())
-                            * TABLEAU_Y_SPACING;
+            y = TABLEAU_Y + tableausFaceUp[action.destinationIdx].length()
+                            * TABLEAU_Y_SPACING_FACE_DOWN +
+                tableausFaceDown[action.destinationIdx].length()
+                * TABLEAU_Y_SPACING_FACE_UP;
           } else {
             assert (action.moveType == MOVE_TYPE::TO_FOUNDATION);
             x = FOUNDATION_X + FOUNDATION_X_SPACING * action.destinationIdx;

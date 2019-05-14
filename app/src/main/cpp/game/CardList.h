@@ -16,15 +16,15 @@ public:
     cards.insert(cards.begin(), cardNumber);
   }
 
-  std::vector<int> asArray() {  //TODO rename in C++ version
+  const std::vector<int> asArray() const {  //TODO rename in C++ version
     return cards;
   }
 
-  int get(int idx) {
+  int get(int idx) const {
     return cards[idx];
   }
 
-  unsigned int length() {
+  unsigned int length() const {
     return (int) cards.size();
   }
 
@@ -34,7 +34,7 @@ public:
     return result;
   }
 
-  int indexOf(int cardNumber) {
+  int indexOf(int cardNumber) const {
     auto entry = find(cards.begin(), cards.end(), cardNumber);
     if (entry == cards.end()) {
       return -1;
@@ -52,7 +52,7 @@ public:
   }
 
   void shuffle() {
-    std::mt19937 generator{3};
+    std::mt19937 generator{5};
     std::shuffle(cards.begin(), cards.end(), generator);
   }
 };
