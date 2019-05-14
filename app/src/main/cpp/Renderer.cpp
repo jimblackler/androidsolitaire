@@ -101,6 +101,7 @@ private:
   std::set<int> draggable;
   float previousX;
   float previousY;
+  bool click;
   std::list<int> draggingCards;
   std::vector<float> x;
   std::vector<float> y;
@@ -251,35 +252,35 @@ private:
 
     switch (type) {
       case AMOTION_EVENT_ACTION_DOWN:
-        if (this->draggingCards.empty()) {
-          for (auto it = order.rbegin(); it != order.rend(); it++) {
-            int cardNumber = *it;
-            if (x < this->x[cardNumber]) {
-              continue;
-            }
-            if (y < this->y[cardNumber]) {
-              continue;
-            }
-            if (x > this->x[cardNumber] + CARD_WIDTH) {
-              continue;
-            }
-            if (y > this->y[cardNumber] + CARD_HEIGHT) {
-              continue;
-            }
+        for (auto it = order.rbegin(); it != order.rend(); it++) {
+          int cardNumber = *it;
+          if (x < this->x[cardNumber]) {
+            continue;
+          }
+          if (y < this->y[cardNumber]) {
+            continue;
+          }
+          if (x > this->x[cardNumber] + CARD_WIDTH) {
+            continue;
+          }
+          if (y > this->y[cardNumber] + CARD_HEIGHT) {
+            continue;
+          }
 
-            if (this->draggable.count(cardNumber)) {
-              std::list<int> cards = dragHandler->startDrag(cardNumber);
-              //this.click = true;
-              this->draggingCards = cards;
-              for (int draggingCard : draggingCards) {
-                this->raiseCard(draggingCard);
-              }
-              break;
+          if (this->draggable.count(cardNumber)) {
+            std::list<int> cards = dragHandler->startDrag(cardNumber);
+            click = true;
+            this->draggingCards = cards;
+            for (int draggingCard : draggingCards) {
+              this->raiseCard(draggingCard);
             }
+            break;
           }
         }
+
         break;
       case AMOTION_EVENT_ACTION_MOVE:
+        click = false;
         for (int cardNumber : draggingCards) {
           this->x[cardNumber] += x - previousX;
           this->y[cardNumber] += y - previousY;
@@ -288,14 +289,13 @@ private:
       case AMOTION_EVENT_ACTION_UP:
         if (!draggingCards.empty()) {
           int firstCard = draggingCards.front();
-          dragHandler->cardClickedOrDropped(firstCard, false);
+          dragHandler->cardClickedOrDropped(firstCard, click);
           draggingCards.clear();
         }
         break;
       default:
         break;
     }
-
 
     previousX = x;
     previousY = y;
