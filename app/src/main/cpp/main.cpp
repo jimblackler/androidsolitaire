@@ -1,6 +1,7 @@
 #include <memory>
 #include <EGL/egl.h>
 #include "Engine.h"
+#include <jni.h>
 
 static int32_t handleInput(struct android_app *app, AInputEvent *event) {
   auto engine = (struct Engine *) app->userData;
@@ -21,3 +22,8 @@ void android_main(struct android_app *app) {
   engine->mainLoop();
 }
 
+extern "C" JNIEXPORT void JNICALL
+Java_net_jimblackler_solitaire_MainActivity_newGame(JNIEnv *env,
+                                                    jobject instance) {
+  assert(false);
+}
