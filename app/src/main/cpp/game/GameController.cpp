@@ -39,7 +39,7 @@ static const auto FLY_DISTANCE_MAX = 800;
 struct Curve {
   long long startTime;
   long long endTime;
-  std::vector<float> start;
+  glm::vec3 start;
   float flyHeight;
   float endX;
   float endY;
@@ -133,7 +133,7 @@ public:
         t = 1;
       }
       for (int cardNumber : raisingCards) {
-        std::vector<float> position = renderer->getCardPosition(cardNumber);
+        glm::vec3 position = renderer->getCardPosition(cardNumber);
         renderer->positionCard(cardNumber, position[0], position[1],
                                RAISE_HEIGHT * t);
       }
@@ -270,7 +270,7 @@ public:
     renderer->raiseCard(cardNumber);
     renderer->setDraggable(cardNumber, false);
 
-    std::vector<float> position = renderer->getCardPosition(cardNumber);
+    glm::vec3 position = renderer->getCardPosition(cardNumber);
 
     float deltaX = position[0] - x;
     float deltaY = position[1] - y;

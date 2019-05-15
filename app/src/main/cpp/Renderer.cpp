@@ -35,8 +35,6 @@ const int GEARS_Y = 28;
 
 struct PlaceHolder {
   Sprite *sprite;
-  float x;
-  float y;
   std::function<void()> onClick;
 };
 
@@ -94,15 +92,13 @@ public:
     textureSamplerId = glGetUniformLocation(program, "textureSampler");
 
     cardSprites.reserve(NUMBER_CARDS);
-    x.reserve(NUMBER_CARDS);
-    y.reserve(NUMBER_CARDS);
-    z.reserve(NUMBER_CARDS);
     for (int cardNumber = 0; cardNumber < NUMBER_CARDS; cardNumber++) {
       order.push_back(cardNumber);
-      cardSprites[cardNumber] = newSprite();
+      cardSprites[cardNumber] = newSprite(CARD_WIDTH, CARD_HEIGHT);
     }
 
-    gearsSprite = newSprite();
+    gearsSprite = newSprite(GEARS_WIDTH, GEARS_HEIGHT);
+    gearsSprite->setPosition({GEARS_X, GEARS_Y, 0});
     gearsSprite->setUVs((float) GEARS_LEFT / TEXTURE_WIDTH,
                         (float) (GEARS_LEFT + GEARS_WIDTH) / TEXTURE_WIDTH,
                         (float) GEARS_TOP / TEXTURE_HEIGHT,
@@ -117,9 +113,6 @@ private:
   float previousY;
   bool click;
   std::list<int> draggingCards;
-  std::vector<float> x;
-  std::vector<float> y;
-  std::vector<float> z;
   std::list<PlaceHolder> placeHolders;
   Sprite *gearsSprite;
 
@@ -186,41 +179,29 @@ private:
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     for (PlaceHolder &placeHolder: placeHolders) {
-      glm::mat4 mvp2 = glm::translate(mvp, {placeHolder.x, placeHolder.y, 0});
-      mvp2 = glm::scale(mvp2, {CARD_WIDTH, CARD_HEIGHT, 1});
-      glUniformMatrix4fv(matrixId, 1, GL_FALSE, &mvp2[0][0]);
-      placeHolder.sprite->draw();
+      placeHolder.sprite->draw(mvp, matrixId);
     }
 
     for (int pass = 0; pass < 2; pass++) {
       for (int cardNumber : order) {
-        if ((pass == 0) != (z[cardNumber] == 0)) {
+        const Sprite *sprite = cardSprites[cardNumber];
+        if ((pass == 0) != (sprite->getPosition().z == 0)) {
           continue;
         }
-        glm::mat4 mvp2 =
-            glm::translate(mvp, {x[cardNumber], y[cardNumber] - z[cardNumber],
-                                 0});
-        mvp2 = glm::scale(mvp2, {CARD_WIDTH, CARD_HEIGHT, 1});
-        glUniformMatrix4fv(matrixId, 1, GL_FALSE, &mvp2[0][0]);
-        cardSprites[cardNumber]->draw();
+
+        sprite->draw(mvp, matrixId);
       }
     }
-
-    {
-      glm::mat4 mvp2 = glm::translate(mvp, {GEARS_X, GEARS_Y, 0});
-      mvp2 = glm::scale(mvp2, {GEARS_WIDTH, GEARS_HEIGHT, 1});
-      glUniformMatrix4fv(matrixId, 1, GL_FALSE, &mvp2[0][0]);
-      gearsSprite->draw();
-    }
-
+    gearsSprite->draw(mvp, matrixId);
     eglSwapBuffers(display, surface);
   }
 
   void placeHolder(const int x, const int y, std::function<void()> onClick)
   override {
-    Sprite *sprite = newSprite();
+    Sprite *sprite = newSprite(CARD_WIDTH, CARD_HEIGHT);
+    sprite->setPosition({x, y, 0});
     _setBy(sprite, BLANK_ROW, PLACEHOLDER_COLUMN);
-    placeHolders.push_back(PlaceHolder{sprite, (float) x, (float) y, onClick});
+    placeHolders.push_back(PlaceHolder{sprite, onClick});
   }
 
   void _setBy(int cardNumber, int suit, int type) {
@@ -232,7 +213,6 @@ private:
     float right = ((float) CARD_WIDTH * type + CARD_WIDTH) / TEXTURE_WIDTH;
     float top = ((float) CARD_HEIGHT * suit) / TEXTURE_HEIGHT;
     float bottom = ((float) CARD_HEIGHT * suit + CARD_HEIGHT) / TEXTURE_HEIGHT;
-
     sprite->setUVs(left, right, top, bottom);
   }
 
@@ -247,9 +227,8 @@ private:
   }
 
   void positionCard(int cardNumber, float x, float y, float z) override {
-    this->x[cardNumber] = x;
-    this->y[cardNumber] = y;
-    this->z[cardNumber] = z;
+    Sprite *sprite = cardSprites[cardNumber];
+    sprite->setPosition({x, y, z});
   }
 
   void setDraggable(int cardNumber, bool draggable) override {
@@ -265,8 +244,9 @@ private:
     order.push_back(cardNumber);
   }
 
-  std::vector<float> getCardPosition(int cardNumber) override {
-    return {x[cardNumber], y[cardNumber], z[cardNumber]};
+  const glm::vec3 &getCardPosition(int cardNumber) const override {
+    Sprite *sprite = cardSprites[cardNumber];
+    return sprite->getPosition();
   }
 
   void setDragHandler(DragHandler *dragHandler) override {
@@ -282,16 +262,8 @@ private:
       case AMOTION_EVENT_ACTION_DOWN:
         for (auto it = order.rbegin(); it != order.rend(); it++) {
           int cardNumber = *it;
-          if (x < this->x[cardNumber]) {
-            continue;
-          }
-          if (y < this->y[cardNumber]) {
-            continue;
-          }
-          if (x > this->x[cardNumber] + CARD_WIDTH) {
-            continue;
-          }
-          if (y > this->y[cardNumber] + CARD_HEIGHT) {
+          const Sprite *sprite = cardSprites[cardNumber];
+          if (!sprite->hits(x, y)) {
             continue;
           }
 
@@ -309,16 +281,7 @@ private:
           if (!placeHolder.onClick) {
             continue;
           }
-          if (x < placeHolder.x) {
-            continue;
-          }
-          if (y < placeHolder.y) {
-            continue;
-          }
-          if (x > placeHolder.x + CARD_WIDTH) {
-            continue;
-          }
-          if (y > placeHolder.y + CARD_HEIGHT) {
+          if (!placeHolder.sprite->hits(x, y)) {
             continue;
           }
           placeHolder.onClick();
@@ -328,8 +291,11 @@ private:
       case AMOTION_EVENT_ACTION_MOVE:
         click = false;
         for (int cardNumber : draggingCards) {
-          this->x[cardNumber] += x - previousX;
-          this->y[cardNumber] += y - previousY;
+          Sprite *sprite = cardSprites[cardNumber];
+          auto position = sprite->getPosition();
+          sprite->setPosition({position.x + x - previousX,
+                               position.y + y - previousY,
+                               position.z});
         }
         break;
       case AMOTION_EVENT_ACTION_UP:

@@ -1,6 +1,8 @@
 #include <GLES/gl.h>
 #include <GLES3/gl32.h>
 #include "Sprite.h"
+#include "glm/detail/type_mat.hpp"
+#include "glm/gtx/transform.hpp"
 
 static const GLfloat gVertexBufferData[] = {
     0, 0, 0,
@@ -11,17 +13,22 @@ static const GLfloat gVertexBufferData[] = {
 
 class LocalSprite : public Sprite {
 public:
-  LocalSprite() {
+  LocalSprite(float width, float height) {
     glGenBuffers(1, &vertexBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(gVertexBufferData), gVertexBufferData,
                  GL_STATIC_DRAW);
     glGenBuffers(1, &uvBuffer);
+    this->width = width;
+    this->height = height;
   }
 
 private:
+  glm::vec3 position;
   GLuint vertexBuffer;
   GLuint uvBuffer;
+  float width;
+  float height;
 
   void setUVs(float left, float right, float top, float bottom) override {
     GLfloat gUvBufferData[] = {
@@ -36,7 +43,20 @@ private:
                  GL_STATIC_DRAW);
   }
 
-  void draw() override {
+  void setPosition(const glm::vec3 &position) override {
+    this->position = position;
+  }
+
+  const glm::vec3 &getPosition() const override {
+    return position;
+  }
+
+  void draw(const glm::mat4 &mvp, int matrixId) const override {
+    glm::mat4 mvp2 = glm::translate(mvp,
+                                    {position.x, position.y - position.z, 0});
+    mvp2 = glm::scale(mvp2, {width, height, 1});
+    glUniformMatrix4fv(matrixId, 1, GL_FALSE, &mvp2[0][0]);
+
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
@@ -50,8 +70,24 @@ private:
     glDisableVertexAttribArray(1);
     glDisableVertexAttribArray(0);
   }
+
+  bool hits(float x, float y) const override {
+    if (x < position.x) {
+      return false;
+    }
+    if (y < position.y) {
+      return false;
+    }
+    if (x > position.x + width) {
+      return false;
+    }
+    if (y > position.y + height) {
+      return false;
+    }
+    return true;
+  }
 };
 
-Sprite *newSprite() {
-  return new LocalSprite();
+Sprite *newSprite(float width, float height) {
+  return new LocalSprite(width, height);
 }

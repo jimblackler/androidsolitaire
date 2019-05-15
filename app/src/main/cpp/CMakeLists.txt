@@ -15,6 +15,7 @@ add_subdirectory(glm)
 
 # build native_app_glue as a static lib
 set(${CMAKE_C_FLAGS}, "${CMAKE_C_FLAGS}")
+add_definitions("-DGLM_FORCE_RADIANS")
 add_library(native_app_glue STATIC
         ${ANDROID_NDK}/sources/android/native_app_glue/android_native_app_glue.c)
 
