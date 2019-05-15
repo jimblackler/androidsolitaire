@@ -287,6 +287,14 @@ private:
           placeHolder.onClick();
           break;
         }
+        if (gearsSprite->hits(x, y)) {
+          JNIEnv *jni;
+          app->activity->vm->AttachCurrentThread(&jni, nullptr);
+          jclass clazz = jni->GetObjectClass(app->activity->clazz);
+          jmethodID methodID = jni->GetMethodID(clazz, "gearsPressed", "()V");
+          jni->CallVoidMethod(app->activity->clazz, methodID);
+          app->activity->vm->DetachCurrentThread();
+        }
         break;
       case AMOTION_EVENT_ACTION_MOVE:
         click = false;
