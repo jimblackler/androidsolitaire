@@ -26,6 +26,13 @@ const int BLANK_ROW = 4;
 const int CARDBACK_COLUMN = 0;
 const int PLACEHOLDER_COLUMN = 1;
 
+const int GEARS_LEFT = 112;
+const int GEARS_TOP = 717;
+const int GEARS_WIDTH = 38;
+const int GEARS_HEIGHT = 38;
+const int GEARS_X = 796;
+const int GEARS_Y = 28;
+
 struct PlaceHolder {
   Sprite *sprite;
   float x;
@@ -94,6 +101,12 @@ public:
       order.push_back(cardNumber);
       cardSprites[cardNumber] = newSprite();
     }
+
+    gearsSprite = newSprite();
+    gearsSprite->setUVs((float) GEARS_LEFT / TEXTURE_WIDTH,
+                        (float) (GEARS_LEFT + GEARS_WIDTH) / TEXTURE_WIDTH,
+                        (float) GEARS_TOP / TEXTURE_HEIGHT,
+                        (float) (GEARS_TOP + GEARS_HEIGHT) / TEXTURE_HEIGHT);
   }
 
 private:
@@ -108,6 +121,7 @@ private:
   std::vector<float> y;
   std::vector<float> z;
   std::list<PlaceHolder> placeHolders;
+  Sprite *gearsSprite;
 
   GLuint program;
   GLuint texture;
@@ -124,6 +138,8 @@ private:
   android_app *app;
 
   ~LocalRenderer() {
+    delete gearsSprite;
+
     for (Sprite *sprite: cardSprites) {
       delete sprite;
     }
@@ -188,6 +204,13 @@ private:
         glUniformMatrix4fv(matrixId, 1, GL_FALSE, &mvp2[0][0]);
         cardSprites[cardNumber]->draw();
       }
+    }
+
+    {
+      glm::mat4 mvp2 = glm::translate(mvp, {GEARS_X, GEARS_Y, 0});
+      mvp2 = glm::scale(mvp2, {GEARS_WIDTH, GEARS_HEIGHT, 1});
+      glUniformMatrix4fv(matrixId, 1, GL_FALSE, &mvp2[0][0]);
+      gearsSprite->draw();
     }
 
     eglSwapBuffers(display, surface);
