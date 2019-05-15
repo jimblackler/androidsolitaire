@@ -51,8 +51,12 @@ public:
     return true;
   }
 
+  void clear() {
+    cards.clear();
+  }
+
   void shuffle() {
-    std::mt19937 generator{5};
+    std::mt19937 generator((unsigned long) time(0));
     std::shuffle(cards.begin(), cards.end(), generator);
   }
 };

@@ -33,10 +33,7 @@ public class MainActivity extends NativeActivity {
                                   Intent data) {
     super.onActivityResult(requestCode, resultCode, data);
     if (resultCode == RESULT_OK) {
-      switch (data.getStringExtra("action")) {
-        case "newGame":
-          newGame();
-      }
+      action(data.getStringExtra("action"));
     }
   }
 
@@ -45,5 +42,5 @@ public class MainActivity extends NativeActivity {
     Common.setDecorView(getWindow().getDecorView());
   }
 
-  native void newGame();
+  native void action(String action);
 }

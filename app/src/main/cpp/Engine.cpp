@@ -125,8 +125,15 @@ private:
       }
     }
   }
+
+  void action(const std::string &action) override {
+    if (action == "newGame") {
+      gameState->newGame();
+    }
+  }
+
 };
 
-struct Engine *NewEngine(android_app *app) {
+struct Engine *newEngine(android_app *app) {
   return new LocalEngine(app);
 }

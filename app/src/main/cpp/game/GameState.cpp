@@ -11,6 +11,7 @@ class LocalGameState : public GameState {
 
   void newGame() override {  // todo ... add from settings
     // Add cards to deck
+    deck.clear();
     for (int idx = 0; idx != NUMBER_CARDS; idx++) {
       deck.add(idx);
     }
@@ -21,19 +22,29 @@ class LocalGameState : public GameState {
     tableausFaceDown.resize(NUMBER_TABLEAUS);
     tableausFaceUp.resize(NUMBER_TABLEAUS);
     for (int tableau = 0; tableau != NUMBER_TABLEAUS; tableau++) {
+      CardList& tableauFaceDown = tableausFaceDown[tableau];
+      tableauFaceDown.clear();
       for (int position = 0; position <= tableau - 1; position++) {
-        tableausFaceDown[tableau].add(deck.pop());
+        tableauFaceDown.add(deck.pop());
       }
-      tableausFaceUp[tableau].add(deck.pop());
+      CardList& tableauFaceUp = tableausFaceUp[tableau];
+      tableauFaceUp.clear();
+      tableauFaceUp.add(deck.pop());
     }
 
     // Stock.
+    stock.clear();
     while (deck.length() > 0) {
       stock.add(deck.pop());
     }
 
     // Foundations
     foundations.resize(NUMBER_FOUNDATIONS);
+    for (CardList& foundation : foundations) {
+      foundation.clear();
+    }
+
+    waste.clear();
   }
 
   void _draw() {
