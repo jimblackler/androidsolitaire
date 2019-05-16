@@ -15,6 +15,3 @@ char *load(const char *filename, bool addNull, AAssetManager *assetManager) {
   }
   return buffer;
 }
-
-
-
