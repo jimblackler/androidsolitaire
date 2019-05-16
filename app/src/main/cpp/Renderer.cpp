@@ -269,6 +269,7 @@ private:
 
           if (this->draggable.count(cardNumber)) {
             std::list<int> cards = dragHandler->startDrag(cardNumber);
+            javaCall("vibrate");
             click = true;
             this->draggingCards = cards;
             for (int draggingCard : draggingCards) {
@@ -284,16 +285,13 @@ private:
           if (!placeHolder.sprite->hits(x, y)) {
             continue;
           }
+          javaCall("vibrate");
           placeHolder.onClick();
           break;
         }
         if (gearsSprite->hits(x, y)) {
-          JNIEnv *jni;
-          app->activity->vm->AttachCurrentThread(&jni, nullptr);
-          jclass clazz = jni->GetObjectClass(app->activity->clazz);
-          jmethodID methodID = jni->GetMethodID(clazz, "gearsPressed", "()V");
-          jni->CallVoidMethod(app->activity->clazz, methodID);
-          app->activity->vm->DetachCurrentThread();
+          javaCall("vibrate");
+          javaCall("gearsPressed");
         }
         break;
       case AMOTION_EVENT_ACTION_MOVE:
@@ -319,6 +317,15 @@ private:
 
     previousX = x;
     previousY = y;
+  }
+
+  void javaCall(const char *method) const {
+    JNIEnv *jni;
+    app->activity->vm->AttachCurrentThread(&jni, nullptr);
+    jclass clazz = jni->GetObjectClass(app->activity->clazz);
+    jmethodID methodID = jni->GetMethodID(clazz, method, "()V");
+    jni->CallVoidMethod(app->activity->clazz, methodID);
+    app->activity->vm->DetachCurrentThread();
   }
 };
 

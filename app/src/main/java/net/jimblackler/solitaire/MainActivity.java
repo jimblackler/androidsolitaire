@@ -1,8 +1,12 @@
 package net.jimblackler.solitaire;
 
 import android.app.NativeActivity;
+import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.view.View;
 
 import static java.lang.System.loadLibrary;
@@ -28,6 +32,16 @@ public class MainActivity extends NativeActivity {
     startActivityForResult(intent, 0);
   }
 
+  protected void vibrate() {
+    Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+    int duration = 5;
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+      vibrator.vibrate(VibrationEffect.createOneShot(
+          duration, VibrationEffect.DEFAULT_AMPLITUDE));
+    } else {
+      vibrator.vibrate(duration);
+    }
+  }
   @Override
   protected void onActivityResult(int requestCode, int resultCode,
                                   Intent data) {
