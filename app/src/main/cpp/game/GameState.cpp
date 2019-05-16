@@ -22,12 +22,12 @@ class LocalGameState : public GameState {
     tableausFaceDown.resize(NUMBER_TABLEAUS);
     tableausFaceUp.resize(NUMBER_TABLEAUS);
     for (int tableau = 0; tableau != NUMBER_TABLEAUS; tableau++) {
-      CardList& tableauFaceDown = tableausFaceDown[tableau];
+      CardList &tableauFaceDown = tableausFaceDown[tableau];
       tableauFaceDown.clear();
       for (int position = 0; position <= tableau - 1; position++) {
         tableauFaceDown.add(deck.pop());
       }
-      CardList& tableauFaceUp = tableausFaceUp[tableau];
+      CardList &tableauFaceUp = tableausFaceUp[tableau];
       tableauFaceUp.clear();
       tableauFaceUp.add(deck.pop());
     }
@@ -40,7 +40,7 @@ class LocalGameState : public GameState {
 
     // Foundations
     foundations.resize(NUMBER_FOUNDATIONS);
-    for (CardList& foundation : foundations) {
+    for (CardList &foundation : foundations) {
       foundation.clear();
     }
 
