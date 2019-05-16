@@ -4,7 +4,7 @@
 #include <jni.h>
 #include <string>
 
-Engine* gEngine;
+Engine *gEngine;
 
 static int32_t handleInput(struct android_app *app, AInputEvent *event) {
   auto engine = (struct Engine *) app->userData;
@@ -27,7 +27,7 @@ void android_main(struct android_app *app) {
   delete gEngine;
 }
 
-std::string fromJstring(JNIEnv *env, jstring jStr){
+std::string fromJstring(JNIEnv *env, jstring jStr) {
   auto chars = env->GetStringUTFChars(jStr, nullptr);
   std::string str(chars);
   env->ReleaseStringUTFChars(jStr, chars);
@@ -36,8 +36,7 @@ std::string fromJstring(JNIEnv *env, jstring jStr){
 
 extern "C" JNIEXPORT void JNICALL
 Java_net_jimblackler_solitaire_MainActivity_action(JNIEnv *env,
-                                                    jobject instance,
-                                                    jstring action) {
-
+                                                   jobject instance,
+                                                   jstring action) {
   gEngine->action(fromJstring(env, action));
 }
