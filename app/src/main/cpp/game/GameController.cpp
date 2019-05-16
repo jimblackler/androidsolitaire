@@ -18,8 +18,10 @@ static const auto STOCK_Y = 18;
 static const auto TABLEAU_X = STOCK_X;
 static const auto TABLEAU_Y = 174;
 static const auto TABLEAU_X_SPACING = 115;
-static const auto TABLEAU_Y_SPACING_FACE_DOWN = 14;
-static const auto TABLEAU_Y_SPACING_FACE_UP = 22;
+static const auto TABLEAU_Y_MIN_SPACING_FACE_DOWN = 6;
+static const auto TABLEAU_Y_MAX_SPACING_FACE_DOWN = 14;
+static const auto TABLEAU_Y_MAX_SPACING_FACE_UP = 24;
+static const auto TABLEAU_HEIGHT = 235;
 static const auto FOUNDATION_X = 338;
 static const auto FOUNDATION_X_SPACING = 115;
 static const auto FOUNDATION_Y = STOCK_Y;
@@ -209,18 +211,40 @@ public:
       float position = TABLEAU_Y;
       const CardList &tableauFaceDown = tableausFaceDown[tableauIdx];
       int faceDownLength = tableauFaceDown.length();
+      const CardList &tableauFaceUp = tableausFaceUp[tableauIdx];
+      int faceUpLength = tableauFaceUp.length();
+      float tableauYSpacingFaceDown;
+      float tableauYSpacingFaceUp;
+
+      float availableForFaceUp =
+          TABLEAU_HEIGHT - faceDownLength * TABLEAU_Y_MIN_SPACING_FACE_DOWN;
+
+      if (availableForFaceUp / faceUpLength > TABLEAU_Y_MAX_SPACING_FACE_UP) {
+        tableauYSpacingFaceUp = TABLEAU_Y_MAX_SPACING_FACE_UP;
+      } else {
+        tableauYSpacingFaceUp = availableForFaceUp / faceUpLength;
+      }
+      float availableForFaceDown =
+          TABLEAU_HEIGHT - faceUpLength * tableauYSpacingFaceUp;
+      if (availableForFaceDown / faceDownLength >
+          TABLEAU_Y_MAX_SPACING_FACE_DOWN) {
+        tableauYSpacingFaceDown = TABLEAU_Y_MAX_SPACING_FACE_DOWN;
+      } else {
+        tableauYSpacingFaceDown = availableForFaceDown / faceDownLength;
+      }
+
       for (int cardNumber: tableauFaceDown.asArray()) {
         _placeCard(cardNumber, TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
                    position, false, 0);
         renderer->faceDown(cardNumber);
-        position += TABLEAU_Y_SPACING_FACE_DOWN;
+        position += tableauYSpacingFaceDown;
       }
-      const CardList &tableauFaceUp = tableausFaceUp[tableauIdx];
+
       for (int cardNumber: tableauFaceUp.asArray()) {
         _placeCard(cardNumber, TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
                    position, true, 0);
         renderer->faceUp(cardNumber);
-        position += TABLEAU_Y_SPACING_FACE_UP;
+        position += tableauYSpacingFaceUp;
       }
     }
 
@@ -363,9 +387,9 @@ public:
           if (action.moveType == MOVE_TYPE::TO_TABLEAU) {
             x = TABLEAU_X + TABLEAU_X_SPACING * action.destinationIdx;
             y = TABLEAU_Y + tableausFaceUp[action.destinationIdx].length()
-                            * TABLEAU_Y_SPACING_FACE_DOWN +
+                            * TABLEAU_Y_MAX_SPACING_FACE_DOWN +
                 tableausFaceDown[action.destinationIdx].length()
-                * TABLEAU_Y_SPACING_FACE_UP;
+                * TABLEAU_Y_MAX_SPACING_FACE_UP;
           } else {
             assert (action.moveType == MOVE_TYPE::TO_FOUNDATION);
             x = FOUNDATION_X + FOUNDATION_X_SPACING * action.destinationIdx;
