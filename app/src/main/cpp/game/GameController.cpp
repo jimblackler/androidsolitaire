@@ -14,9 +14,9 @@
 #include <sys/time.h>
 
 static const auto STOCK_X = 26;
-static const auto STOCK_Y = 28;
+static const auto STOCK_Y = 18;
 static const auto TABLEAU_X = STOCK_X;
-static const auto TABLEAU_Y = 180;
+static const auto TABLEAU_Y = 174;
 static const auto TABLEAU_X_SPACING = 115;
 static const auto TABLEAU_Y_SPACING_FACE_DOWN = 14;
 static const auto TABLEAU_Y_SPACING_FACE_UP = 22;
