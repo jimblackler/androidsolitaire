@@ -22,7 +22,6 @@ public:
       state = *(struct State *) app->savedState;  // TODO ... gameState into savedState
     }
     gameState = newGameState();
-    gameState->newGame();
     active = false;
   }
 
@@ -61,11 +60,12 @@ private:
       case APP_CMD_INIT_WINDOW:
         if (app->window) {
           assert(!renderer);
+          gameState->newGame();
           renderer = newRenderer(app);
           controller = newGameController(renderer, gameState);
           renderer->setDragHandler(controller);
           controller->render();
-          controller->render();
+          controller->draw();
         }
         break;
       case APP_CMD_TERM_WINDOW:
