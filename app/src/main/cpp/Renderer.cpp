@@ -91,7 +91,7 @@ public:
     matrixId = glGetUniformLocation(program, "MVP");
     textureSamplerId = glGetUniformLocation(program, "textureSampler");
 
-    cardSprites.reserve(NUMBER_CARDS);
+    cardSprites.resize(NUMBER_CARDS);
     for (int cardNumber = 0; cardNumber < NUMBER_CARDS; cardNumber++) {
       order.push_back(cardNumber);
       cardSprites[cardNumber] = newSprite(CARD_WIDTH, CARD_HEIGHT);
