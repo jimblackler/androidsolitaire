@@ -3,7 +3,6 @@ package net.jimblackler.solitaire;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import jimblackler.net.solitaire.R;
 
 public class GearsActivity extends Activity {
 
