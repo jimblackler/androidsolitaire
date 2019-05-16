@@ -1,4 +1,5 @@
 <resources>
   <string name="app_name">Solitaire</string>
   <string name="new_game">New game</string>
+  <string name="quit">Quit</string>
 </resources>

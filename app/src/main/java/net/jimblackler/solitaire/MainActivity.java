@@ -33,7 +33,12 @@ public class MainActivity extends NativeActivity {
                                   Intent data) {
     super.onActivityResult(requestCode, resultCode, data);
     if (resultCode == RESULT_OK) {
-      action(data.getStringExtra("action"));
+      String action = data.getStringExtra("action");
+      if (action.equals("quit")) {
+        finish();
+      } else {
+        action(action);
+      }
     }
   }
 
