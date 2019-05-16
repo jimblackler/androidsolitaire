@@ -4,6 +4,7 @@
 #include "game/GameState.h"
 #include "game/GameController.h"
 #include <android/sensor.h>
+#include <deque>
 #include <memory>
 
 #define ALOGI(...) __android_log_print(ANDROID_LOG_ERROR, "Engine", __VA_ARGS__)
@@ -20,8 +21,8 @@ public:
     if (app->savedState) {
       state = *(struct State *) app->savedState;  // TODO ... gameState into savedState
     }
-    this->gameState = newGameState();
-    this->gameState->newGame();
+    gameState = newGameState();
+    gameState->newGame();
     active = false;
   }
 
@@ -30,6 +31,7 @@ private:
   Renderer *renderer = nullptr;
   GameController *controller = nullptr;;
   GameState *gameState = nullptr;
+  std::deque<std::string> actions;
   bool active;
   State state;
 
@@ -60,8 +62,8 @@ private:
         if (app->window) {
           assert(!renderer);
           renderer = newRenderer(app);
-          controller = newGameController(renderer, this->gameState);
-          renderer->setDragHandler(this->controller);
+          controller = newGameController(renderer, gameState);
+          renderer->setDragHandler(controller);
           controller->render();
           controller->render();
         }
@@ -69,8 +71,8 @@ private:
       case APP_CMD_TERM_WINDOW:
         delete renderer;
         renderer = nullptr;
-        delete this->controller;
-        this->controller = nullptr;
+        delete controller;
+        controller = nullptr;
         active = false;
         break;
       case APP_CMD_GAINED_FOCUS:
@@ -102,6 +104,20 @@ private:
     }
   }
 
+  void processActions() {
+    if (actions.empty()) {
+      return;
+    }
+    for (const std::string &action : actions) {
+      if (action == "newGame") {
+        gameState->newGame();
+        controller->render();
+        controller->draw();
+      }
+    }
+    actions.clear();
+  }
+
   void mainLoop() override {
     while (true) {
       while (true) {
@@ -112,6 +128,7 @@ private:
         if (id < 0 && !source) {
           break;
         }
+        processActions();
         source->process(app, source);
         if (app->destroyRequested) {
           delete renderer;
@@ -127,11 +144,8 @@ private:
   }
 
   void action(const std::string &action) override {
-    if (action == "newGame") {
-      gameState->newGame();
-    }
+    actions.push_front(action);
   }
-
 };
 
 struct Engine *newEngine(android_app *app) {

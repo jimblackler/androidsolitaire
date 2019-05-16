@@ -88,7 +88,7 @@ public:
     }
   }
 
-  void draw() {
+  void draw() override {
     gameState->execute({MOVE_TYPE::DRAW, 0, 0});
     // TODO. store
     render();

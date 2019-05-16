@@ -9,6 +9,7 @@ public:
   virtual ~GameController() = default;
   virtual void render() = 0;
   virtual void animate() = 0;
+  virtual void draw() = 0;
 };
 
 extern GameController *newGameController(Renderer *renderer,
