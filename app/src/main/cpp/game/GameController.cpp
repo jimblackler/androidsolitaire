@@ -10,6 +10,7 @@
 
 #include <list>
 #include <map>
+#include <cmath>
 #include <sys/time.h>
 #include <thread>
 
@@ -142,13 +143,13 @@ public:
       }
       if (t == 1) {
         raisingCards.clear();
-        raisingCards.clear();
       }
     }
     _tryAutoPlay();
   };
 
   void render() override {
+    const GameState *gameState = this->gameState;
     // Stop all animations immediately (old onArrive functions are invalid)
     for (const auto &pair : curves) {
       int cardNumber = pair.first;
@@ -158,20 +159,20 @@ public:
     curves.clear();
 
     // Position stock cards.
-    const CardList &stock = gameState->getStock();
-    int stockLength = stock.length();
+    auto &stock = gameState->getStock();
+    int stockLength = stock.size();
 
     for (int idx = 0; idx != stockLength; idx++) {
-      int cardNumber = stock.get(idx);
+      int cardNumber = stock[idx];
       renderer->faceDown(cardNumber);
       _placeCard(cardNumber, STOCK_X, STOCK_Y, false, 0);
     }
 
     // Position waste cards.
-    const CardList &waste = gameState->getWaste();
-    int wasteLength = waste.length();
+    auto &waste = gameState->getWaste();
+    int wasteLength = waste.size();
     for (int idx = 0; idx != wasteLength; idx++) {
-      int cardNumber = waste.get(idx);
+      int cardNumber = waste[idx];
 
       renderer->faceUp(cardNumber);
       int staggerOrder = std::max(idx - wasteLength + CARDS_TO_DRAW, 0);
@@ -186,14 +187,14 @@ public:
     }
 
     // Position foundation cards.
-    auto foundations = gameState->getFoundations();
+    auto &foundations = gameState->getFoundations();
     for (int foundationIdx = 0; foundationIdx != NUMBER_FOUNDATIONS;
          foundationIdx++) {
-      const CardList &foundation = foundations[foundationIdx];
-      int foundationLength = foundation.length();
+      auto &foundation = foundations[foundationIdx];
+      int foundationLength = foundation.size();
 
       for (int position = 0; position < foundationLength; position++) {
-        int cardNumber = foundation.get(position);
+        int cardNumber = foundation[position];
         renderer->faceUp(cardNumber);
         if (position == foundationLength - 1) {
           std::list<int> cards{cardNumber};
@@ -205,16 +206,14 @@ public:
     }
 
     // Position tableau cards.
-    const std::vector<CardList> &tableausFaceDown =
-        gameState->getTableausFaceDown();
-    const std::vector<CardList> &tableausFaceUp =
-        gameState->getTableausFaceUp();
+    auto &tableausFaceDown = gameState->getTableausFaceDown();
+    auto &tableausFaceUp = gameState->getTableausFaceUp();
     for (int tableauIdx = 0; tableauIdx != NUMBER_TABLEAUS; tableauIdx++) {
       float position = TABLEAU_Y;
-      const CardList &tableauFaceDown = tableausFaceDown[tableauIdx];
-      int faceDownLength = tableauFaceDown.length();
-      const CardList &tableauFaceUp = tableausFaceUp[tableauIdx];
-      int faceUpLength = tableauFaceUp.length();
+      auto &tableauFaceDown = tableausFaceDown[tableauIdx];
+      int faceDownLength = tableauFaceDown.size();
+      auto &tableauFaceUp = tableausFaceUp[tableauIdx];
+      int faceUpLength = tableauFaceUp.size();
       float tableauYSpacingFaceDown;
       float tableauYSpacingFaceUp;
 
@@ -235,14 +234,14 @@ public:
         tableauYSpacingFaceDown = availableForFaceDown / faceDownLength;
       }
 
-      for (int cardNumber: tableauFaceDown.asArray()) {
+      for (int cardNumber: tableauFaceDown) {
         _placeCard(cardNumber, TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
                    position, false, 0);
         renderer->faceDown(cardNumber);
         position += tableauYSpacingFaceDown;
       }
 
-      for (int cardNumber: tableauFaceUp.asArray()) {
+      for (int cardNumber: tableauFaceUp) {
         _placeCard(cardNumber, TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
                    position, true, 0);
         renderer->faceUp(cardNumber);
@@ -253,42 +252,32 @@ public:
   }
 
   void _tryAutoPlay() {
-    if (timeLastRenderered + 1000 > getTimeNow()) {
+    if (timeLastRenderered + 500 > getTimeNow()) {
       return;
     }
 
     long long timeNow = getTimeNow();
-    const std::vector<CardList> &tableausFaceDown =
-        gameState->getTableausFaceDown();
-    const std::vector<CardList> &tableausFaceUp =
-        gameState->getTableausFaceUp();
-    const CardList &stock = gameState->getStock();
-    const CardList &waste = gameState->getWaste();
+    auto &tableausFaceDown = gameState->getTableausFaceDown();
+    auto &tableausFaceUp = gameState->getTableausFaceUp();
+    auto &stock = gameState->getStock();
+    auto &waste = gameState->getWaste();
     // Auto play
-    if (stock.length() == 0 && waste.length() == 0) {
+    if (stock.empty() && waste.empty()) {
       auto actionsFor = gameState->getActions();
       bool anyFaceDown = false;
       for (int tableauIdx = 0; tableauIdx != NUMBER_TABLEAUS; tableauIdx++) {
-        auto tableau = tableausFaceDown[tableauIdx];
-        if (tableau.length() > 0) {
+        if (!tableausFaceDown[tableauIdx].empty()) {
           anyFaceDown = true;
           break;
         }
       }
       if (!anyFaceDown) {
         std::this_thread::sleep_for(std::chrono::seconds(2));
-        for (auto tableauIdx = 0; tableauIdx != NUMBER_TABLEAUS; tableauIdx++) {
-          auto tableau = tableausFaceUp[tableauIdx];
-          if (tableau.length() <= 0) {
+        for (auto &tableau : tableausFaceUp) {
+          if (tableau.empty()) {
             continue;
           }
-          int position = tableau.length() - 1;
-          int cardNumber = tableau.get(position);
-          auto actions = actionsFor[cardNumber];
-          if (actions.empty()) {
-            continue;
-          }
-          for (auto action : actions) {
+          for (auto &action : actionsFor[tableau.back()]) {
             if (action.moveType == MOVE_TYPE::TO_TABLEAU) {
               continue;
             }
@@ -388,9 +377,9 @@ public:
       }
 
       // Find closet action.
-      auto tableausFaceUp = gameState->getTableausFaceUp();
-      auto tableausFaceDown = gameState->getTableausFaceDown();
-      auto position = renderer->getCardPosition(cardNumber);
+      auto &tableausFaceUp = gameState->getTableausFaceUp();
+      auto &tableausFaceDown = gameState->getTableausFaceDown();
+      auto &position = renderer->getCardPosition(cardNumber);
       double closest = DBL_MAX;
       const Action *closestAction = nullptr;
       for (const Action &action : actions) {
@@ -399,9 +388,9 @@ public:
           float y;
           if (action.moveType == MOVE_TYPE::TO_TABLEAU) {
             x = TABLEAU_X + TABLEAU_X_SPACING * action.destinationIdx;
-            y = TABLEAU_Y + tableausFaceUp[action.destinationIdx].length()
+            y = TABLEAU_Y + tableausFaceUp[action.destinationIdx].size()
                             * TABLEAU_Y_MAX_SPACING_FACE_DOWN +
-                tableausFaceDown[action.destinationIdx].length()
+                tableausFaceDown[action.destinationIdx].size()
                 * TABLEAU_Y_MAX_SPACING_FACE_UP;
           } else {
             assert (action.moveType == MOVE_TYPE::TO_FOUNDATION);
@@ -424,8 +413,6 @@ public:
     }
     this->render();
   }
-
-
 };
 
 GameController *newGameController(Renderer *renderer, GameState *gameState) {

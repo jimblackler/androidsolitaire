@@ -34,12 +34,11 @@ public class MainActivity extends NativeActivity {
 
   protected void vibrate() {
     Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-    int duration = 5;
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
       vibrator.vibrate(VibrationEffect.createOneShot(
-          duration, VibrationEffect.DEFAULT_AMPLITUDE));
+          5, VibrationEffect.DEFAULT_AMPLITUDE));
     } else {
-      vibrator.vibrate(duration);
+      vibrator.vibrate(15);
     }
   }
   @Override
