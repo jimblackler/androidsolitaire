@@ -184,10 +184,10 @@ class LocalGameState : public GameState {
       std::list<int> canPlaceOn;
       if (foundation.empty()) {
         // Empty foundation ... will take Aces
-        canPlaceOn = std::list<int>{Rules::getCard(0, ACE_TYPE),
-                                    Rules::getCard(1, ACE_TYPE),
-                                    Rules::getCard(2, ACE_TYPE),
-                                    Rules::getCard(3, ACE_TYPE)};
+        canPlaceOn = {Rules::getCard(0, ACE_TYPE),
+                      Rules::getCard(1, ACE_TYPE),
+                      Rules::getCard(2, ACE_TYPE),
+                      Rules::getCard(3, ACE_TYPE)};
       } else {
         canPlaceOn = Rules::canPlaceOnInFoundation(foundation.back());
       }
