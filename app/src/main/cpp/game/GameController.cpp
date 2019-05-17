@@ -252,7 +252,7 @@ public:
   }
 
   void _tryAutoPlay() {
-    if (timeLastRenderered + 500 > getTimeNow()) {
+    if (timeLastRenderered + 50 > getTimeNow()) {
       return;
     }
 
