@@ -1,8 +1,6 @@
 #include "GameState.h"
 #include "Action.h"
 
-#include "vectorUtils.h"
-
 #include <random>
 
 class LocalGameState : public GameState {
@@ -74,32 +72,35 @@ class LocalGameState : public GameState {
     // In tableau cards?
     for (int tableauIdx = 0; tableauIdx != NUMBER_TABLEAUS; tableauIdx++) {
       std::vector<int> &tableauFaceUp = tableausFaceUp[tableauIdx];
-      if (vector_utils::remove(tableauFaceUp, cardNumber)) {
-        // Reveal undercard if needed.
-        if (tableauFaceUp.empty()) {
-          std::vector<int> &tableauFaceDown = tableausFaceDown[tableauIdx];
-          if (!tableauFaceDown.empty()) {
-            tableauFaceUp.insert(tableauFaceUp.begin(),
-                                 tableauFaceDown.back());
-            tableauFaceDown.pop_back();
-          }
-        }
-        return true;
+      auto entry = std::find(tableauFaceUp.begin(), tableauFaceUp.end(),
+                             cardNumber);
+      if (entry == tableauFaceUp.end()) {
+        continue;
       }
-    }
-    // In stock cards?
-    if (vector_utils::remove(stock, cardNumber)) {
+      tableauFaceUp.erase(entry);
+      // Reveal undercard if needed.
+      if (tableauFaceUp.empty()) {
+        std::vector<int> &tableauFaceDown = tableausFaceDown[tableauIdx];
+        if (!tableauFaceDown.empty()) {
+          tableauFaceUp.insert(tableauFaceUp.begin(),
+                               tableauFaceDown.back());
+          tableauFaceDown.pop_back();
+        }
+      }
       return true;
     }
 
     // In waste cards?
-    if (vector_utils::remove(waste, cardNumber)) {
+    if (cardNumber == waste.back()) {
+      waste.pop_back();
       return true;
     }
 
     // Foundations
     for (auto &foundation: foundations) {
-      if (vector_utils::remove(foundation, cardNumber)) {
+      auto entry = std::find(foundation.begin(), foundation.end(), cardNumber);
+      if (entry != foundation.end()) {
+        foundation.erase(entry);
         return true;
       }
     }
