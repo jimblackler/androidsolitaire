@@ -1,7 +1,8 @@
 #include <random>
 #include <vector>
+#include "VectorUtils.h"
 
-class CardList {
+class CardList  {
   std::vector<int> cards;
 public:
 
@@ -29,26 +30,15 @@ public:
   }
 
   int pop() {
-    int result = cards.back();
-    cards.pop_back();
-    return result;
+    return vector_utils::pop(cards);
   }
 
   int indexOf(int cardNumber) const {
-    auto entry = find(cards.begin(), cards.end(), cardNumber);
-    if (entry == cards.end()) {
-      return -1;
-    }
-    return (int) (entry - cards.begin());
+    return vector_utils::indexOf(cards, cardNumber);
   }
 
   bool remove(int cardNumber) {
-    auto entry = find(cards.begin(), cards.end(), cardNumber);
-    if (entry == cards.end()) {
-      return false;
-    }
-    cards.erase(entry);
-    return true;
+    return vector_utils::remove(cards, cardNumber);
   }
 
   void clear() {
