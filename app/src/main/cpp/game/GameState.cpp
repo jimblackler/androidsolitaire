@@ -30,17 +30,20 @@ class LocalGameState : public GameState {
       std::vector<int> &tableauFaceDown = tableausFaceDown[tableau];
       tableauFaceDown.clear();
       for (int position = 0; position <= tableau - 1; position++) {
-        tableauFaceDown.push_back(vector_utils::pop(deck));
+        tableauFaceDown.push_back(deck.back());
+        deck.pop_back();
       }
       std::vector<int> &tableauFaceUp = tableausFaceUp[tableau];
       tableauFaceUp.clear();
-      tableauFaceUp.push_back(vector_utils::pop(deck));
+      tableauFaceUp.push_back(deck.back());
+      deck.pop_back();
     }
 
     // Stock.
     stock.clear();
     while (!deck.empty()) {
-      stock.push_back(vector_utils::pop(deck));
+      stock.push_back(deck.back());
+      deck.pop_back();
     }
 
     // Foundations
@@ -55,12 +58,14 @@ class LocalGameState : public GameState {
   void _draw() {
     if (stock.empty()) {
       while (!waste.empty()) {
-        stock.push_back(vector_utils::pop(waste));
+        stock.push_back(waste.back());
+        waste.pop_back();
       }
     } else {
       // X cards from stock to waste.
       for (int idx = 0; idx != CARDS_TO_DRAW && !stock.empty(); idx++) {
-        waste.push_back(vector_utils::pop(stock));
+        waste.push_back(stock.back());
+        stock.pop_back();
       }
     }
   }
@@ -75,7 +80,8 @@ class LocalGameState : public GameState {
           std::vector<int> &tableauFaceDown = tableausFaceDown[tableauIdx];
           if (!tableauFaceDown.empty()) {
             tableauFaceUp.insert(tableauFaceUp.begin(),
-                                 vector_utils::pop(tableauFaceDown));
+                                 tableauFaceDown.back());
+            tableauFaceDown.pop_back();
           }
         }
         return true;
