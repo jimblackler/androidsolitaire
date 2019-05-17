@@ -110,9 +110,13 @@ class LocalGameState : public GameState {
   int stackedUnder(int cardNumber) const {
     // In tableau cards?
     for (auto &tableau : tableausFaceUp) {
-      int idx = vector_utils::indexOf(tableau, cardNumber);
-      if (idx >= 0 && idx < tableau.size() - 1) {
-        return tableau[idx + 1];
+      auto entry = std::find(tableau.begin(), tableau.end(), cardNumber);
+      if (entry == tableau.end()) {
+        continue;
+      }
+      entry++;
+      if (entry != tableau.end()) {
+        return *entry;
       }
     }
     return -1;
