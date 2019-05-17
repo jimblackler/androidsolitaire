@@ -8,10 +8,10 @@
 
 #include "../Renderer.h"
 
-#include <algorithm>
-#include <cmath>
+#include <list>
 #include <map>
 #include <sys/time.h>
+#include <thread>
 
 static const auto STOCK_X = 26;
 static const auto STOCK_Y = 18;
@@ -64,6 +64,7 @@ public:
   std::list<int> raisingCards;
   int lastCardMoved = -1;
   GameState *gameState;
+  long long int timeLastRenderered;
 
   LocalGameController(Renderer *renderer, GameState *gameState) {
     this->renderer = renderer;
@@ -144,6 +145,7 @@ public:
         raisingCards.clear();
       }
     }
+    _tryAutoPlay();
   };
 
   void render() override {
@@ -247,46 +249,57 @@ public:
         position += tableauYSpacingFaceUp;
       }
     }
+    timeLastRenderered = getTimeNow();
+  }
 
+  void _tryAutoPlay() {
+    if (timeLastRenderered + 1000 > getTimeNow()) {
+      return;
+    }
+
+    long long timeNow = getTimeNow();
+    const std::vector<CardList> &tableausFaceDown =
+        gameState->getTableausFaceDown();
+    const std::vector<CardList> &tableausFaceUp =
+        gameState->getTableausFaceUp();
+    const CardList &stock = gameState->getStock();
+    const CardList &waste = gameState->getWaste();
     // Auto play
-//    if (gameState->stock.length() == = 0 && gameState->waste.length() == = 0) {
-//      const actionsFor = gameState->getActions();
-//      let anyFaceDown = false;
-//      for (let tableauIdx = 0; tableauIdx != = Rules.NUMBER_TABLEAUS; tableauIdx++) {
-//        const tableau = gameState->tableausFaceDown[tableauIdx];
-//        if (tableau.length() > 0) {
-//          anyFaceDown = true;
-//          break;
-//        }
-//      }
-//      if (!anyFaceDown) {
-//        window.setTimeout(() = > {
-//            for (let tableauIdx = 0; tableauIdx !== Rules.NUMBER_TABLEAUS; tableauIdx++) {
-//              const tableau = gameState->tableausFaceUp[tableauIdx];
-//              if (tableau.length() <= 0) {
-//                continue;
-//              }
-//              const position = tableau.length() - 1;
-//              const cardNumber = tableau.get(position);
-//              const actions = actionsFor.get(cardNumber);
-//              if (!actions) {
-//                continue;
-//              }
-//              for (const action of actions) {
-//                if (action.moveType == = MOVE_TYPE.TO_TABLEU) {
-//                  continue;
-//                }
-//                gameState->execute(action);
-//                GameStore.store(gameState);
-//                this.render(gameState);
-//                return;
-//              }
-//            }
-//            // All complete. If the user hits refresh, start a new game.
-//            GameStore.erase();
-//        }, 400);
-//      }
-//    }
+    if (stock.length() == 0 && waste.length() == 0) {
+      auto actionsFor = gameState->getActions();
+      bool anyFaceDown = false;
+      for (int tableauIdx = 0; tableauIdx != NUMBER_TABLEAUS; tableauIdx++) {
+        auto tableau = tableausFaceDown[tableauIdx];
+        if (tableau.length() > 0) {
+          anyFaceDown = true;
+          break;
+        }
+      }
+      if (!anyFaceDown) {
+        std::this_thread::sleep_for(std::chrono::seconds(2));
+        for (auto tableauIdx = 0; tableauIdx != NUMBER_TABLEAUS; tableauIdx++) {
+          auto tableau = tableausFaceUp[tableauIdx];
+          if (tableau.length() <= 0) {
+            continue;
+          }
+          int position = tableau.length() - 1;
+          int cardNumber = tableau.get(position);
+          auto actions = actionsFor[cardNumber];
+          if (actions.empty()) {
+            continue;
+          }
+          for (auto action : actions) {
+            if (action.moveType == MOVE_TYPE::TO_TABLEAU) {
+              continue;
+            }
+            gameState->execute(action);
+            //GameStore.store(gameState);
+            render();
+            return;
+          }
+        }
+      }
+    }
   }
 
   void _placeCard(int cardNumber, float x, float y, bool draggable, int delay) {
@@ -411,6 +424,8 @@ public:
     }
     this->render();
   }
+
+
 };
 
 GameController *newGameController(Renderer *renderer, GameState *gameState) {
