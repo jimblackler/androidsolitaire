@@ -21,9 +21,7 @@ void android_main(struct android_app *app) {
   app->userData = gEngine;
   app->onAppCmd = handleCmd;
   app->onInputEvent = handleInput;
-
   gEngine->mainLoop();
-
   delete gEngine;
 }
 
