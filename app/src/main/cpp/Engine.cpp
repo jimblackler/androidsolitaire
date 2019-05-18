@@ -9,19 +9,20 @@
 
 #define ALOGI(...) __android_log_print(ANDROID_LOG_ERROR, "Engine", __VA_ARGS__)
 
-struct State {
-  bool placeholder;
-};
-
 class LocalEngine : public Engine {
 
 public:
   explicit LocalEngine(android_app *app) {
     this->app = app;
-    if (app->savedState) {
-      state = *(struct State *) app->savedState;  // TODO ... gameState into savedState
-    }
     gameState = newGameState();
+    if (app->savedState) {
+      gameState->deserialize(app->savedState);
+    } else {
+      gameState->newGame();
+      // TODO: do on a delay to animate
+      gameState->execute({MOVE_TYPE::DRAW, 0, 0});
+    }
+
     active = false;
   }
 
@@ -32,7 +33,6 @@ private:
   GameState *gameState = nullptr;
   std::deque<std::string> actions;
   bool active;
-  State state;
 
   int32_t handleInput(AInputEvent *event) override {
     if (AInputEvent_getType(event) != AINPUT_EVENT_TYPE_MOTION) {
@@ -60,12 +60,11 @@ private:
       case APP_CMD_INIT_WINDOW:
         if (app->window) {
           assert(!renderer);
-          gameState->newGame();
           renderer = newRenderer(app);
           controller = newGameController(renderer, gameState);
           renderer->setDragHandler(controller);
+          controller->render(); // Twice to stop animations.
           controller->render();
-          controller->draw();
         }
         break;
       case APP_CMD_TERM_WINDOW:
@@ -82,9 +81,7 @@ private:
         active = false;
         break;
       case APP_CMD_SAVE_STATE:
-        app->savedStateSize = sizeof(struct State);
-        app->savedState = malloc(app->savedStateSize);
-        *((struct State *) app->savedState) = state;
+        app->savedState = gameState->serialize(&app->savedStateSize);
         break;
       case APP_CMD_DESTROY:
         break;

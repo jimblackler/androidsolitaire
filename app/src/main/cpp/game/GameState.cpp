@@ -4,7 +4,7 @@
 #include <random>
 
 class LocalGameState : public GameState {
-  std::vector<int> deck;
+
   std::vector<int> stock;
   std::vector<int> waste;
   std::vector<std::vector<int>> foundations;
@@ -13,7 +13,7 @@ class LocalGameState : public GameState {
 
   void newGame() override {  // todo ... add from settings
     // Add cards to deck
-    deck.clear();
+    std::vector<int> deck;
     for (int idx = 0; idx != NUMBER_CARDS; idx++) {
       deck.push_back(idx);
     }
@@ -260,6 +260,69 @@ class LocalGameState : public GameState {
   const std::vector<std::vector<int>> &getTableausFaceUp() const override {
     return tableausFaceUp;
   }
+
+  static void _serialize(int pass, const std::vector<int>& vector,
+      void **memory, size_t *size) {
+    if (pass == 0) {
+      *size += sizeof(int) + sizeof(int) * vector.size();
+    } else {
+      auto memoryi = (int **) memory;
+      *(*memoryi)++ = (int) vector.size();
+      for (int value : vector) {
+        *(*memoryi)++ = value;
+      }
+    }
+  }
+
+  static void _deserialize(std::vector<int>& vector, const void **memory)  {
+    auto memoryi = (int **) memory;
+    auto size = (unsigned int) *(*memoryi)++;
+    vector.resize(size);
+    for (int idx = 0; idx < size; idx++) {
+      vector[idx] = *(*memoryi)++;
+    }
+  }
+
+  void *serialize(size_t *size) const override {
+    void* memory = nullptr;
+    void *write;
+    for (int pass = 0; pass < 2; pass++) {
+      _serialize(pass, stock, &write, size);
+      _serialize(pass, waste, &write, size);
+      for (auto &foundation : foundations) {
+        _serialize(pass, foundation, &write, size);
+      }
+      for (auto &tableauFaceDown : tableausFaceDown) {
+        _serialize(pass, tableauFaceDown, &write, size);
+      }
+      for (auto &tableauFaceUp : tableausFaceUp) {
+        _serialize(pass, tableauFaceUp, &write, size);
+      }
+      if (pass == 0) {
+        memory = malloc(*size);
+        write = memory;
+      }
+    }
+    return memory;
+  }
+
+  void deserialize(const void *memory) override {
+    _deserialize(stock, &memory);
+    _deserialize(waste, &memory);
+    foundations.resize(NUMBER_FOUNDATIONS);
+    for (auto &foundation : foundations) {
+      _deserialize(foundation, &memory);
+    }
+    tableausFaceDown.resize(NUMBER_TABLEAUS);
+    for (auto &tableauFaceDown : tableausFaceDown) {
+      _deserialize(tableauFaceDown, &memory);
+    }
+    tableausFaceUp.resize(NUMBER_TABLEAUS);
+    for (auto &tableauFaceUp : tableausFaceUp) {
+      _deserialize(tableauFaceUp, &memory);
+    }
+  }
+
 };
 
 GameState *newGameState() {

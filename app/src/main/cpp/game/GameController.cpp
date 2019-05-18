@@ -100,6 +100,9 @@ public:
 
   void animate() override {
     long long timeNow = getTimeNow();
+    if (curves.empty()) {
+      timeLastRenderered = timeNow;
+    }
     auto it = curves.cbegin();
     while (it != curves.cend()) {
       auto pair = *it;
@@ -171,6 +174,8 @@ public:
     // Position waste cards.
     auto &waste = gameState->getWaste();
     int wasteLength = waste.size();
+    assert (wasteLength >= 0); // temp till bug is found
+    assert (wasteLength < NUMBER_CARDS);  // temp till bug is found
     for (int idx = 0; idx != wasteLength; idx++) {
       int cardNumber = waste[idx];
 
@@ -248,11 +253,10 @@ public:
         position += tableauYSpacingFaceUp;
       }
     }
-    timeLastRenderered = getTimeNow();
   }
 
   void _tryAutoPlay() {
-    if (timeLastRenderered + 50 > getTimeNow()) {
+    if (timeLastRenderered > getTimeNow() - 150) {
       return;
     }
 
@@ -272,7 +276,6 @@ public:
         }
       }
       if (!anyFaceDown) {
-        std::this_thread::sleep_for(std::chrono::seconds(2));
         for (auto &tableau : tableausFaceUp) {
           if (tableau.empty()) {
             continue;
@@ -283,6 +286,7 @@ public:
             }
             gameState->execute(action);
             //GameStore.store(gameState);
+            timeLastRenderered = LONG_LONG_MAX;
             render();
             return;
           }
