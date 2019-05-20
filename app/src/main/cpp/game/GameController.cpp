@@ -100,38 +100,40 @@ public:
 
   void animate() override {
     long long timeNow = getTimeNow();
-    if (curves.empty()) {
-      timeLastRenderered = timeNow;
-    }
-    auto it = curves.cbegin();
-    while (it != curves.cend()) {
-      auto pair = *it;
-      auto cardNumber = pair.first;
-      auto curve = pair.second;
-      if (timeNow < curve.startTime) {
-        it++;
-        continue;
-      }
-      float t = MathUtils::toT(curve.startTime, curve.endTime, timeNow);
-      if (t > 1) {
-        renderer->positionCard(cardNumber, curve.endX, curve.endY, 0);
-        renderer->setDraggable(cardNumber, curve.draggable);
-        curves.erase(it++);
-      } else {
-        float multiplier1 = sinf(t * (float) M_PI / 2);
-        float v;
-
-        if (curve.start[2] < curve.flyHeight) {
-          float start = (float) M_PI - asinf(curve.start[2] / curve.flyHeight);
-          float a = MathUtils::tInRange(start, 0.0F, t);
-          v = sinf(a) * curve.flyHeight;
-        } else {
-          v = curve.start[2] * (1 - t);
+    if (!curves.empty()) {
+      auto it = curves.cbegin();
+      while (it != curves.cend()) {
+        auto pair = *it;
+        auto cardNumber = pair.first;
+        auto curve = pair.second;
+        if (timeNow < curve.startTime) {
+          it++;
+          continue;
         }
-        float x = MathUtils::tInRange(curve.start[0], curve.endX, multiplier1);
-        float y = MathUtils::tInRange(curve.start[1], curve.endY, multiplier1);
-        renderer->positionCard(cardNumber, x, y, v);
-        it++;
+        float t = MathUtils::toT(curve.startTime, curve.endTime, timeNow);
+        if (t > 1) {
+          renderer->positionCard(cardNumber, curve.endX, curve.endY, 0);
+          renderer->setDraggable(cardNumber, curve.draggable);
+          curves.erase(it++);
+        } else {
+          float multiplier1 = sinf(t * (float) M_PI / 2);
+          float v;
+
+          if (curve.start[2] < curve.flyHeight) {
+            float start = (float) M_PI - asinf(curve.start[2] / curve.flyHeight);
+            float a = MathUtils::tInRange(start, 0.0F, t);
+            v = sinf(a) * curve.flyHeight;
+          } else {
+            v = curve.start[2] * (1 - t);
+          }
+          float x = MathUtils::tInRange(curve.start[0], curve.endX, multiplier1);
+          float y = MathUtils::tInRange(curve.start[1], curve.endY, multiplier1);
+          renderer->positionCard(cardNumber, x, y, v);
+          it++;
+        }
+      }
+      if (curves.empty()) {
+        timeLastRenderered = timeNow;
       }
     }
     if (!raisingCards.empty()) {
@@ -148,7 +150,9 @@ public:
         raisingCards.clear();
       }
     }
-    _tryAutoPlay();
+    if (curves.empty()) {
+      _tryAutoPlay();
+    }
   };
 
   void render() override {
