@@ -20,7 +20,7 @@ const int TEXTURE_HEIGHT = 900;
 const int CARD_WIDTH = 103;
 const int CARD_HEIGHT = 143;
 
-const int TARGET_WIDTH = 852;
+const int TARGET_WIDTH = 864;
 
 const int BLANK_ROW = 4;
 const int CARDBACK_COLUMN = 0;
@@ -77,9 +77,8 @@ public:
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
 
-    char *data = load("cards206x286.rgba", false, app->activity->assetManager);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, TEXTURE_WIDTH * 2,
-                 TEXTURE_HEIGHT * 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    char *data = load("sprites3348x2250.rgba", false, app->activity->assetManager);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 3348, 2250, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
     delete data;
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
