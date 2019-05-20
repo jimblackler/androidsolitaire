@@ -77,9 +77,9 @@ public:
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
 
-    char *data = load("cards103x143.rgba", false, app->activity->assetManager);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, TEXTURE_WIDTH, TEXTURE_HEIGHT,
-                 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    char *data = load("cards206x286.rgba", false, app->activity->assetManager);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, TEXTURE_WIDTH * 2,
+                 TEXTURE_HEIGHT * 2, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
     delete data;
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
