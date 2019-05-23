@@ -3,16 +3,25 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               xmlns:tools="http://schemas.android.com/tools"
               android:orientation="vertical"
-              android:layout_width="match_parent"
+              android:layout_width="400dp"
               android:layout_height="match_parent"
-              tools:context="net.jimblackler.solitaire.GearsActivity">
+              tools:context="net.jimblackler.solitaire.GearsActivity"
+>
   <Button
       android:text="@string/new_game"
       android:layout_width="match_parent"
       android:layout_height="wrap_content" android:id="@+id/new_game"/>
   <Button
-      android:text="@string/quit"
+      android:text="@string/retry_same_game"
       android:layout_width="match_parent"
-      android:layout_height="wrap_content" android:id="@+id/quit"/>
+      android:layout_height="wrap_content" android:id="@+id/button"/>
+  <Button
+      android:text="@string/about_solitaire_by_jim_blackler"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content" android:id="@+id/button2"/>
+  <CheckBox
+      android:text="@string/vibrate_on_touch"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content" android:id="@+id/checkBox"/>
 </LinearLayout>
 
