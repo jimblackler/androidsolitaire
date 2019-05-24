@@ -16,6 +16,10 @@ public class GearsActivity extends Activity {
       setResult(RESULT_OK, new Intent().putExtra("action", "newGame"));
       finish();
     });
+    findViewById(R.id.retry_game).setOnClickListener(v -> {
+      setResult(RESULT_OK, new Intent().putExtra("action", "restartGame"));
+      finish();
+    });
     Common.setDecorView(getWindow().getDecorView());
   }
 }

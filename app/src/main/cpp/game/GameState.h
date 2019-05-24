@@ -9,6 +9,7 @@ class GameState {
 public:
 
   virtual void newGame() = 0;
+  virtual void restartGame() = 0;
 
   virtual const std::vector<int> &getStock() const = 0;
   virtual const std::vector<int> &getWaste() const = 0;

@@ -110,6 +110,10 @@ private:
         gameState->newGame();
         controller->render();
         controller->draw();
+      } else if (action == "restartGame") {
+        gameState->restartGame();
+        controller->render();
+        controller->draw();
       }
     }
     actions.clear();

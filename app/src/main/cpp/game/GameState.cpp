@@ -10,15 +10,21 @@ class LocalGameState : public GameState {
   std::vector<std::vector<int>> foundations;
   std::vector<std::vector<int>> tableausFaceDown;
   std::vector<std::vector<int>> tableausFaceUp;
+  unsigned long seed;
 
   void newGame() override {  // todo ... add from settings
+    seed = (unsigned long) time(0);
+    restartGame();
+  }
+
+  void restartGame() {
     // Add cards to deck
     std::vector<int> deck;
     for (int idx = 0; idx != NUMBER_CARDS; idx++) {
       deck.push_back(idx);
     }
 
-    std::mt19937 generator((unsigned long) time(0));
+    std::mt19937 generator(seed);
     std::shuffle(deck.begin(), deck.end(), generator);
 
     // Tableaus.
@@ -261,6 +267,16 @@ class LocalGameState : public GameState {
     return tableausFaceUp;
   }
 
+  static void _serialize(int pass, unsigned long int value,
+                         void **memory, size_t *size) {
+    if (pass == 0) {
+      *size += sizeof(unsigned long);
+    } else {
+      auto memoryi = (unsigned long **) memory;
+      *(*memoryi)++ = value;
+    }
+  }
+
   static void _serialize(int pass, const std::vector<int> &vector,
                          void **memory, size_t *size) {
     if (pass == 0) {
@@ -283,10 +299,16 @@ class LocalGameState : public GameState {
     }
   }
 
+  static unsigned long _deserialize(const void **memory) {
+    auto memoryi = (unsigned long **) memory;
+    return *(*memoryi)++;
+  }
+
   void *serialize(size_t *size) const override {
     void *memory = nullptr;
     void *write;
     for (int pass = 0; pass < 2; pass++) {
+      _serialize(pass, seed, &write, size);
       _serialize(pass, stock, &write, size);
       _serialize(pass, waste, &write, size);
       for (auto &foundation : foundations) {
@@ -307,6 +329,7 @@ class LocalGameState : public GameState {
   }
 
   void deserialize(const void *memory) override {
+    seed = _deserialize(&memory);
     _deserialize(stock, &memory);
     _deserialize(waste, &memory);
     foundations.resize(NUMBER_FOUNDATIONS);

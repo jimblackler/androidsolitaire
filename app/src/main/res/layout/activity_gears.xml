@@ -14,14 +14,14 @@
   <Button
       android:text="@string/retry_same_game"
       android:layout_width="match_parent"
-      android:layout_height="wrap_content" android:id="@+id/button"/>
+      android:layout_height="wrap_content" android:id="@+id/retry_game"/>
   <Button
       android:text="@string/about_solitaire_by_jim_blackler"
       android:layout_width="match_parent"
-      android:layout_height="wrap_content" android:id="@+id/button2"/>
+      android:layout_height="wrap_content" android:id="@+id/about"/>
   <CheckBox
       android:text="@string/vibrate_on_touch"
       android:layout_width="match_parent"
-      android:layout_height="wrap_content" android:id="@+id/checkBox"/>
+      android:layout_height="wrap_content" android:id="@+id/vibrate"/>
 </LinearLayout>
 
