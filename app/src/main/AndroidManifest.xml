@@ -12,7 +12,7 @@
       android:label="@string/app_name"
       android:roundIcon="@mipmap/ic_launcher_round"
       android:theme="@style/AppTheme"
-      tools:ignore="GoogleAppIndexingWarning">
+      tools:ignore="AllowBackup,GoogleAppIndexingWarning">
     <activity android:name="net.jimblackler.solitaire.GearsActivity"
               android:theme="@style/GearsDialog">
     </activity>
