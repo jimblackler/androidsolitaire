@@ -71,17 +71,17 @@ private:
     glDisableVertexAttribArray(0);
   }
 
-  bool hits(float x, float y) const override {
-    if (x < position.x) {
+  bool hits(float x, float y, float margin) const override {
+    if (x < position.x - margin) {
       return false;
     }
-    if (y < position.y) {
+    if (y < position.y - margin) {
       return false;
     }
-    if (x > position.x + width) {
+    if (x > position.x + width + margin) {
       return false;
     }
-    if (y > position.y + height) {
+    if (y > position.y + height + margin) {
       return false;
     }
     return true;

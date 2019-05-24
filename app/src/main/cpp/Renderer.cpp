@@ -176,6 +176,7 @@ private:
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    gearsSprite->draw(mvp, matrixId);
 
     for (PlaceHolder &placeHolder: placeHolders) {
       placeHolder.sprite->draw(mvp, matrixId);
@@ -191,7 +192,6 @@ private:
         sprite->draw(mvp, matrixId);
       }
     }
-    gearsSprite->draw(mvp, matrixId);
     eglSwapBuffers(display, surface);
   }
 
@@ -252,6 +252,43 @@ private:
     this->dragHandler = dragHandler;
   }
 
+  void _pointerDown(float x, float y) {
+    for (auto it = order.rbegin(); it != order.rend(); it++) {
+      int cardNumber = *it;
+      const Sprite *sprite = cardSprites[cardNumber];
+      if (!sprite->hits(x, y)) {
+        continue;
+      }
+
+      if (this->draggable.count(cardNumber)) {
+        std::list<int> cards = dragHandler->startDrag(cardNumber);
+        javaCall("vibrate");
+        click = true;
+        this->draggingCards = cards;
+        for (int draggingCard : draggingCards) {
+          this->raiseCard(draggingCard);
+        }
+        return;
+      }
+    }
+    for (const PlaceHolder &placeHolder: placeHolders) {
+      if (!placeHolder.onClick) {
+        continue;
+      }
+      if (!placeHolder.sprite->hits(x, y)) {
+        continue;
+      }
+      javaCall("vibrate");
+      placeHolder.onClick();
+      return;
+    }
+    if (gearsSprite->hits(x, y, 50)) {
+      javaCall("vibrate");
+      javaCall("gearsPressed");
+      return;
+    }
+  }
+
   void motionEvent(int type, float x, float y) override {
     float targetHeight = TARGET_WIDTH * (float) height / width;
     x = x / width * TARGET_WIDTH;
@@ -259,39 +296,7 @@ private:
 
     switch (type) {
       case AMOTION_EVENT_ACTION_DOWN:
-        for (auto it = order.rbegin(); it != order.rend(); it++) {
-          int cardNumber = *it;
-          const Sprite *sprite = cardSprites[cardNumber];
-          if (!sprite->hits(x, y)) {
-            continue;
-          }
-
-          if (this->draggable.count(cardNumber)) {
-            std::list<int> cards = dragHandler->startDrag(cardNumber);
-            javaCall("vibrate");
-            click = true;
-            this->draggingCards = cards;
-            for (int draggingCard : draggingCards) {
-              this->raiseCard(draggingCard);
-            }
-            break;
-          }
-        }
-        for (const PlaceHolder &placeHolder: placeHolders) {
-          if (!placeHolder.onClick) {
-            continue;
-          }
-          if (!placeHolder.sprite->hits(x, y)) {
-            continue;
-          }
-          javaCall("vibrate");
-          placeHolder.onClick();
-          break;
-        }
-        if (gearsSprite->hits(x, y)) {
-          javaCall("vibrate");
-          javaCall("gearsPressed");
-        }
+        _pointerDown(x, y);
         break;
       case AMOTION_EVENT_ACTION_MOVE:
         click = false;
