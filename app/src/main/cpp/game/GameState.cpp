@@ -261,8 +261,8 @@ class LocalGameState : public GameState {
     return tableausFaceUp;
   }
 
-  static void _serialize(int pass, const std::vector<int>& vector,
-      void **memory, size_t *size) {
+  static void _serialize(int pass, const std::vector<int> &vector,
+                         void **memory, size_t *size) {
     if (pass == 0) {
       *size += sizeof(int) + sizeof(int) * vector.size();
     } else {
@@ -274,7 +274,7 @@ class LocalGameState : public GameState {
     }
   }
 
-  static void _deserialize(std::vector<int>& vector, const void **memory)  {
+  static void _deserialize(std::vector<int> &vector, const void **memory) {
     auto memoryi = (int **) memory;
     auto size = (unsigned int) *(*memoryi)++;
     vector.resize(size);
@@ -284,7 +284,7 @@ class LocalGameState : public GameState {
   }
 
   void *serialize(size_t *size) const override {
-    void* memory = nullptr;
+    void *memory = nullptr;
     void *write;
     for (int pass = 0; pass < 2; pass++) {
       _serialize(pass, stock, &write, size);
