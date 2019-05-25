@@ -50,7 +50,7 @@ struct Curve {
 };
 
 static long long getTimeNow() {
-  struct timeval timeVal;
+  timeval timeVal{0, 0};
   gettimeofday(&timeVal, nullptr);
   return timeVal.tv_sec * 1000 + timeVal.tv_usec / 1000;
 }
