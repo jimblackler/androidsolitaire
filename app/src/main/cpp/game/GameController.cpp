@@ -22,7 +22,7 @@ static const auto TABLEAU_X_SPACING = 115;
 static const auto TABLEAU_Y_MIN_SPACING_FACE_DOWN = 6;
 static const auto TABLEAU_Y_MAX_SPACING_FACE_DOWN = 14;
 static const auto TABLEAU_Y_MAX_SPACING_FACE_UP = 24;
-static const auto TABLEAU_HEIGHT = 235;
+static const auto TABLEAU_BOTTOM_MARGIN = 251;
 static const auto FOUNDATION_X = 338;
 static const auto FOUNDATION_X_SPACING = 115;
 static const auto FOUNDATION_Y = STOCK_Y;
@@ -225,9 +225,9 @@ public:
       int faceUpLength = tableauFaceUp.size();
       float tableauYSpacingFaceDown;
       float tableauYSpacingFaceUp;
-
+      float tableauHeight = renderer->getTargetHeight() - TABLEAU_BOTTOM_MARGIN;
       float availableForFaceUp =
-          TABLEAU_HEIGHT - faceDownLength * TABLEAU_Y_MIN_SPACING_FACE_DOWN;
+          tableauHeight - faceDownLength * TABLEAU_Y_MIN_SPACING_FACE_DOWN;
 
       if (availableForFaceUp / faceUpLength > TABLEAU_Y_MAX_SPACING_FACE_UP) {
         tableauYSpacingFaceUp = TABLEAU_Y_MAX_SPACING_FACE_UP;
@@ -235,7 +235,7 @@ public:
         tableauYSpacingFaceUp = availableForFaceUp / faceUpLength;
       }
       float availableForFaceDown =
-          TABLEAU_HEIGHT - faceUpLength * tableauYSpacingFaceUp;
+          tableauHeight - faceUpLength * tableauYSpacingFaceUp;
       if (availableForFaceDown / faceDownLength >
           TABLEAU_Y_MAX_SPACING_FACE_DOWN) {
         tableauYSpacingFaceDown = TABLEAU_Y_MAX_SPACING_FACE_DOWN;
@@ -419,7 +419,7 @@ public:
         //GameStore.store(gameState);
       }
     }
-    this->render();
+    render();
   }
 };
 

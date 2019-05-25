@@ -23,6 +23,7 @@ public:
   virtual void placeHolder(const int x, const int y, std::function<void()>) = 0;
   virtual void motionEvent(int type, float x, float y) = 0;
   virtual void setDraggable(int cardNumber, bool draggable) = 0;
+  virtual float getTargetHeight() const = 0;
 };
 
 extern Renderer *newRenderer(android_app *app);

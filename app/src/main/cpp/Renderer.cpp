@@ -70,6 +70,8 @@ public:
     eglQuerySurface(display, surface, EGL_WIDTH, &width);
     eglQuerySurface(display, surface, EGL_HEIGHT, &height);
 
+    targetHeight = TARGET_WIDTH * (float) height / width;
+
     GLuint vertexArrayID;
     glGenVertexArrays(1, &vertexArrayID);
     glBindVertexArray(vertexArrayID);
@@ -124,6 +126,7 @@ private:
   EGLContext context;
   EGLint width;
   EGLint height;
+  float targetHeight;
 
   DragHandler *dragHandler;
 
@@ -290,7 +293,6 @@ private:
   }
 
   void motionEvent(int type, float x, float y) override {
-    float targetHeight = TARGET_WIDTH * (float) height / width;
     x = x / width * TARGET_WIDTH;
     y = y / height * targetHeight;
 
@@ -331,8 +333,14 @@ private:
     jni->CallVoidMethod(app->activity->clazz, methodID);
     app->activity->vm->DetachCurrentThread();
   }
+
+  float getTargetHeight() const override {
+    return targetHeight;
+  }
 };
 
 Renderer *newRenderer(android_app *app) {
   return new LocalRenderer(app);
 }
+
+
