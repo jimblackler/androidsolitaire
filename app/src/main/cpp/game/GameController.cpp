@@ -61,11 +61,11 @@ public:
   Renderer *renderer;
   std::map<int, Curve> curves;
   std::map<Action, long long> cardHistory;
-  long long riseStarted;
+  long long riseStarted = 0;
   std::list<int> raisingCards;
   int lastCardMoved = -1;
   GameState *gameState;
-  long long int timeLastRenderered;
+  long long int timeLastRendered = 0;
 
   LocalGameController(Renderer *renderer, GameState *gameState) {
     this->renderer = renderer;
@@ -133,7 +133,7 @@ public:
         }
       }
       if (curves.empty()) {
-        timeLastRenderered = timeNow;
+        timeLastRendered = timeNow;
       }
     }
     if (!raisingCards.empty()) {
@@ -167,7 +167,7 @@ public:
 
     // Position stock cards.
     auto &stock = gameState->getStock();
-    int stockLength = stock.size();
+    auto stockLength = stock.size();
 
     for (int idx = 0; idx != stockLength; idx++) {
       int cardNumber = stock[idx];
@@ -177,7 +177,7 @@ public:
 
     // Position waste cards.
     auto &waste = gameState->getWaste();
-    int wasteLength = waste.size();
+    auto wasteLength = waste.size();
     assert (wasteLength >= 0); // temp till bug is found
     assert (wasteLength < NUMBER_CARDS);  // temp till bug is found
     for (int idx = 0; idx != wasteLength; idx++) {
@@ -200,7 +200,7 @@ public:
     for (int foundationIdx = 0; foundationIdx != NUMBER_FOUNDATIONS;
          foundationIdx++) {
       auto &foundation = foundations[foundationIdx];
-      int foundationLength = foundation.size();
+      auto foundationLength = foundation.size();
 
       for (int position = 0; position < foundationLength; position++) {
         int cardNumber = foundation[position];
@@ -220,9 +220,9 @@ public:
     for (int tableauIdx = 0; tableauIdx != NUMBER_TABLEAUS; tableauIdx++) {
       float position = TABLEAU_Y;
       auto &tableauFaceDown = tableausFaceDown[tableauIdx];
-      int faceDownLength = tableauFaceDown.size();
+      auto faceDownLength = tableauFaceDown.size();
       auto &tableauFaceUp = tableausFaceUp[tableauIdx];
-      int faceUpLength = tableauFaceUp.size();
+      auto faceUpLength = tableauFaceUp.size();
       float tableauYSpacingFaceDown;
       float tableauYSpacingFaceUp;
       float tableauHeight = renderer->getTargetHeight() - TABLEAU_BOTTOM_MARGIN;
@@ -260,7 +260,7 @@ public:
   }
 
   void _tryAutoPlay() {
-    if (timeLastRenderered > getTimeNow() - 150) {
+    if (timeLastRendered > getTimeNow() - 150) {
       return;
     }
 
@@ -290,7 +290,7 @@ public:
             }
             gameState->execute(action);
             //GameStore.store(gameState);
-            timeLastRenderered = LONG_LONG_MAX;
+            timeLastRendered = LONG_LONG_MAX;
             render();
             return;
           }
