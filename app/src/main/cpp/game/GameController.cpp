@@ -177,7 +177,7 @@ public:
 
     // Position waste cards.
     auto &waste = gameState->getWaste();
-    auto wasteLength = waste.size();
+    int wasteLength = (int) waste.size();
     assert (wasteLength >= 0); // temp till bug is found
     assert (wasteLength < NUMBER_CARDS);  // temp till bug is found
     for (int idx = 0; idx != wasteLength; idx++) {
