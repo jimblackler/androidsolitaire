@@ -28,8 +28,7 @@ public class MainActivity extends NativeActivity {
   }
 
   protected void gearsPressed() {
-    Intent intent = new Intent(this, GearsActivity.class);
-    startActivityForResult(intent, 0);
+    startActivityForResult(new Intent(this, GearsActivity.class), 0);
   }
 
   protected void vibrate() {
@@ -41,6 +40,7 @@ public class MainActivity extends NativeActivity {
       vibrator.vibrate(15);
     }
   }
+
   @Override
   protected void onActivityResult(int requestCode, int resultCode,
                                   Intent data) {

@@ -14,8 +14,9 @@
       android:theme="@style/AppTheme"
       tools:ignore="AllowBackup,GoogleAppIndexingWarning">
     <activity android:name="net.jimblackler.solitaire.GearsActivity"
-              android:theme="@style/GearsDialog">
-    </activity>
+              android:theme="@style/GearsDialog"/>
+    <activity android:name=".SettingsActivity"
+              android:theme="@style/GearsDialog"/>
     <activity
         android:name="net.jimblackler.solitaire.MainActivity"
         android:label="@string/app_name"

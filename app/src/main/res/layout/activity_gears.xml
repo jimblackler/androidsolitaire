@@ -20,12 +20,12 @@
       android:layout_width="match_parent"
       android:layout_height="wrap_content" android:id="@+id/retry_game"/>
   <Button
+      android:text="@string/settings"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content" android:id="@+id/settings"/>
+  <Button
       android:text="@string/about_solitaire_by_jim_blackler"
       android:layout_width="match_parent"
       android:layout_height="wrap_content" android:id="@+id/about"/>
-  <CheckBox
-      android:text="@string/vibrate_on_touch"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content" android:id="@+id/vibrate"/>
 </LinearLayout>
 
