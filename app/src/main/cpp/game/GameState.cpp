@@ -3,6 +3,8 @@
 
 #include <random>
 
+const int MAX_UNDO_MOVES = 5;
+
 class LocalGameState : public GameState {
 
   std::vector<int> stock;
@@ -10,14 +12,15 @@ class LocalGameState : public GameState {
   std::vector<std::vector<int>> foundations;
   std::vector<std::vector<int>> tableausFaceDown;
   std::vector<std::vector<int>> tableausFaceUp;
-  unsigned long seed;
+  std::vector<void *> moves;
+  unsigned long seed = 0;
 
   void newGame() override {  // todo ... add from settings
     seed = (unsigned long) time(0);
     restartGame();
   }
 
-  void restartGame() {
+  void restartGame() override {
     // Add cards to deck
     std::vector<int> deck;
     for (int idx = 0; idx != NUMBER_CARDS; idx++) {
@@ -157,6 +160,13 @@ class LocalGameState : public GameState {
   }
 
   void execute(const Action &action) override {
+    size_t size = 0;
+    moves.emplace_back(serialize(&size));
+    if (moves.size() > MAX_UNDO_MOVES) {
+      delete (moves.front());
+      moves.erase(moves.begin());
+    }
+
     switch (action.moveType) {
       case MOVE_TYPE::DRAW:
         _draw();
@@ -168,6 +178,14 @@ class LocalGameState : public GameState {
         _moveToFoundation(action.card, action.destinationIdx);
         break;
     }
+  };
+
+  void undo() override {
+    if (moves.empty()) {
+      return;
+    }
+    deserialize(moves.back());
+    moves.pop_back();
   }
 
   const std::set<int> getMovableCards() const {

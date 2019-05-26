@@ -114,6 +114,9 @@ private:
         gameState->restartGame();
         controller->render();
         controller->draw();
+      } else if (action == "undo") {
+        gameState->undo();
+        controller->render();
       }
     }
     actions.clear();

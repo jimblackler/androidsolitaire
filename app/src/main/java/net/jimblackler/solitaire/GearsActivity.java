@@ -12,6 +12,10 @@ public class GearsActivity extends Activity {
     super.onCreate(savedInstanceState);
     requestWindowFeature(Window.FEATURE_NO_TITLE);
     setContentView(R.layout.activity_gears);
+    findViewById(R.id.undo).setOnClickListener(v -> {
+      setResult(RESULT_OK, new Intent().putExtra("action", "undo"));
+      finish();
+    });
     findViewById(R.id.new_game).setOnClickListener(v -> {
       setResult(RESULT_OK, new Intent().putExtra("action", "newGame"));
       finish();

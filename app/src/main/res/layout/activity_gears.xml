@@ -8,6 +8,10 @@
               tools:context="net.jimblackler.solitaire.GearsActivity"
 >
   <Button
+      android:text="@string/undo_move"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content" android:id="@+id/undo"/>
+  <Button
       android:text="@string/new_game"
       android:layout_width="match_parent"
       android:layout_height="wrap_content" android:id="@+id/new_game"/>
