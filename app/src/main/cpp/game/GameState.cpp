@@ -163,7 +163,7 @@ class LocalGameState : public GameState {
     size_t size = 0;
     moves.emplace_back(serialize(&size));
     if (moves.size() > MAX_UNDO_MOVES) {
-      delete (moves.front());
+      free(moves.front());
       moves.erase(moves.begin());
     }
 
