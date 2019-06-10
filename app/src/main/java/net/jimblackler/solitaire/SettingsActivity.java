@@ -1,17 +1,26 @@
 package net.jimblackler.solitaire;
 
-import android.app.Activity;
 import android.os.Bundle;
+import android.preference.PreferenceActivity;
+import android.preference.PreferenceFragment;
 import android.view.Window;
 import androidx.annotation.Nullable;
 
-public class SettingsActivity extends Activity {
+public class SettingsActivity extends PreferenceActivity {
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
     requestWindowFeature(Window.FEATURE_NO_TITLE);
-    setContentView(R.layout.activity_settings);
-    Common.setDecorView(getWindow().getDecorView());
+    super.onCreate(savedInstanceState);
+    getFragmentManager().beginTransaction().replace(
+        android.R.id.content, new SettingsFragment()).commit();
+  }
+
+  public static class SettingsFragment extends PreferenceFragment {
+    @Override
+    public void onCreate(final Bundle savedInstanceState) {
+      super.onCreate(savedInstanceState);
+      addPreferencesFromResource(R.xml.preferences);
+    }
   }
 }
