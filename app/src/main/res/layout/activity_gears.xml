@@ -2,34 +2,48 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               xmlns:tools="http://schemas.android.com/tools"
+
               android:orientation="vertical"
               android:layout_width="400dp"
               android:layout_height="match_parent"
               tools:context="net.jimblackler.solitaire.GearsActivity"
 >
   <Button
-      android:text="@string/undo_move"
+      android:text="@string/solitaire_by_jim_blackler"
       android:layout_width="match_parent"
-      android:layout_height="wrap_content" android:id="@+id/undo"/>
+      android:backgroundTint="#FF000000"
+      android:textStyle="bold"
+      android:textColor="#FFF"
+      android:layout_height="wrap_content" android:id="@+id/about" />
   <Button
       android:text="@string/new_game"
       android:layout_width="match_parent"
+      android:backgroundTint="#D0FFFF00"
       android:layout_height="wrap_content" android:id="@+id/new_game"/>
   <Button
       android:text="@string/retry_same_game"
       android:layout_width="match_parent"
+      android:backgroundTint="#D0FFFF00"
       android:layout_height="wrap_content" android:id="@+id/retry_game"/>
   <Button
       android:text="@string/settings"
       android:layout_width="match_parent"
+      android:backgroundTint="#D0FFFF00"
       android:layout_height="wrap_content" android:id="@+id/settings"/>
+  <Button
+      android:text="@string/undo_move"
+      android:layout_width="match_parent"
+      android:backgroundTint="#D0FFFF00"
+      android:layout_height="wrap_content" android:id="@+id/undo"/>
+  <Button
+      android:text="@string/about"
+      android:layout_width="match_parent"
+      android:backgroundTint="#D0FFFF00"
+      android:layout_height="wrap_content" android:id="@+id/about2"/>
   <Button
       android:text="@string/rules"
       android:layout_width="match_parent"
+      android:backgroundTint="#D0FFFF00"
       android:layout_height="wrap_content" android:id="@+id/rules"/>
-  <Button
-      android:text="@string/about_solitaire_by_jim_blackler"
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content" android:id="@+id/about"/>
 </LinearLayout>
 
