@@ -8,9 +8,13 @@
     <item name="colorAccent">@color/colorAccent</item>
   </style>
 
-  <style name="GearsDialog" parent="android:Theme.Dialog">
+  <style name="WindowDialog" parent="android:Theme.Dialog">
     <item name="android:windowFullscreen">true</item>
     <item name="windowActionModeOverlay">false</item>
+  </style>
+
+  <style name="HtmlActivity" parent="AppTheme">
+    <item name="android:windowFullscreen">true</item>
   </style>
 
 </resources>

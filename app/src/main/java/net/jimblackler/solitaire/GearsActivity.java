@@ -28,6 +28,14 @@ public class GearsActivity extends Activity {
       startActivityForResult(new Intent(this, SettingsActivity.class), 0);
       finish();
     });
+    findViewById(R.id.rules).setOnClickListener(v -> {
+      startActivityForResult(new Intent(this, RulesActivity.class), 0);
+      finish();
+    });
+    findViewById(R.id.about).setOnClickListener(v -> {
+      startActivityForResult(new Intent(this, AboutActivity.class), 0);
+      finish();
+    });
     Common.setDecorView(getWindow().getDecorView());
   }
 }
