@@ -90,8 +90,10 @@ static GLuint createProgram(const char *vertexSource,
 GLuint loadProgram(const char *vertexShaderFilename,
                    const char *fragmentShaderFilename,
                    AAssetManager *assetManager) {
-  const char *vertexSource = load(vertexShaderFilename, true, assetManager);
-  const char *fragmentSource = load(fragmentShaderFilename, true, assetManager);
+  auto *vertexSource =
+      (const char *) load(vertexShaderFilename, true, assetManager);
+  auto *fragmentSource =
+      (const char *) load(fragmentShaderFilename, true, assetManager);
   GLuint program = createProgram(vertexSource, fragmentSource);
   delete fragmentSource;
   delete vertexSource;

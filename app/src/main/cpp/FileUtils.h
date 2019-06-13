@@ -1,4 +1,6 @@
-#include <android/asset_manager.h>
+#include <stdint.h>
 
-extern char *load(const char *filename, bool addNull,
-                  AAssetManager *assetManager);
+class AAssetManager;
+
+extern uint8_t *load(const char *filename, bool addNull,
+                     AAssetManager *assetManager, size_t *sizeOut = nullptr);
