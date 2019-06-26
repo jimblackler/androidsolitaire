@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="app_name">Solitaire</string>
+  <string name="new_game">New game</string>
+  <string name="quit">Quit</string>
+  <string name="retry_same_game">Retry same game</string>
+  <string name="vibrate_on_touch">Vibrate on touch</string>
+  <string name="about_solitaire_by_jim_blackler">About Solitaire by Jim Blackler</string>
+</resources>
