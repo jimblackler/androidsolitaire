@@ -79,7 +79,7 @@ public:
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
 
-    char *data = load("sprites3348x2250.rgba", false, app->activity->assetManager);
+    uint8_t *data = load("sprites3348x2250.rgba", false, app->activity->assetManager);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 3348, 2250, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
     delete data;
 
