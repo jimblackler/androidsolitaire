@@ -59,7 +59,7 @@ public:
     }
 
     surface = eglCreateWindowSurface(display, config, app->window, nullptr);
-    const EGLint contextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 3,
+    const EGLint contextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 2,
                                      EGL_NONE};
     context = eglCreateContext(display, config, nullptr, contextAttribs);
 
