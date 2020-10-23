@@ -205,9 +205,6 @@ public:
       for (int position = 0; position < foundationLength; position++) {
         int cardNumber = foundation[position];
         renderer->faceUp(cardNumber);
-        if (position == foundationLength - 1) {
-          std::list<int> cards{cardNumber};
-        }
         _placeCard(cardNumber,
                    FOUNDATION_X + FOUNDATION_X_SPACING * foundationIdx,
                    FOUNDATION_Y, true, 0);
