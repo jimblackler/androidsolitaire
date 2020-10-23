@@ -123,6 +123,7 @@ public:
 private:
   std::vector<Sprite *> cardSprites;
   Sprite *selectionIndicator;
+  int indicatedCard = 0;
   std::list<int> order;
   std::set<int> draggable;
   float previousX;
@@ -210,10 +211,18 @@ private:
         }
 
         sprite->draw(mvp, matrixId);
+        
+        if (indicatedCard == cardNumber) {
+          glm::vec3 pos = sprite->getPosition();
+          pos.x += INDICATOR_OFFSET_X;
+          pos.y += INDICATOR_OFFSET_Y;
+          selectionIndicator->setPosition(pos);
+          selectionIndicator->draw(mvp, matrixId);    
+        }
       }
     }
 
-    selectionIndicator->draw(mvp, matrixId);
+    
 
     eglSwapBuffers(display, surface);
   }
@@ -345,6 +354,19 @@ private:
     previousY = y;
   }
 
+  void keyEvent(int32_t action, int32_t keyCode) {
+    if (action != AKEY_EVENT_ACTION_DOWN) {
+      return;
+    }
+    switch (keyCode) {
+      case AKEYCODE_X:
+        indicatedCard++;
+        if (indicatedCard == NUMBER_CARDS) {
+          indicatedCard = 0;
+        }
+    }
+  }
+
   void javaCall(const char *method) const {
     JNIEnv *jni;
     app->activity->vm->AttachCurrentThread(&jni, nullptr);
@@ -362,5 +384,3 @@ private:
 Renderer *newRenderer(android_app *app) {
   return new LocalRenderer(app);
 }
-
-

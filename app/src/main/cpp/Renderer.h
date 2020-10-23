@@ -22,6 +22,7 @@ public:
   virtual void setDragHandler(DragHandler *dragHandler) = 0;
   virtual void placeHolder(const int x, const int y, std::function<void()>) = 0;
   virtual void motionEvent(int type, float x, float y) = 0;
+  virtual void keyEvent(int32_t action, int32_t code) = 0;
   virtual void setDraggable(int cardNumber, bool draggable) = 0;
   virtual float getTargetHeight() const = 0;
 };

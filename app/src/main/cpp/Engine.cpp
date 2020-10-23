@@ -35,24 +35,32 @@ private:
   bool active;
 
   int32_t handleInput(AInputEvent *event) override {
-    if (AInputEvent_getType(event) != AINPUT_EVENT_TYPE_MOTION) {
-      return 0;
-    }
+    switch (AInputEvent_getType(event)) {
+      case AINPUT_EVENT_TYPE_KEY: {
+        renderer->keyEvent(AKeyEvent_getAction(event), AKeyEvent_getKeyCode(event));
+        return 1;
+      }
+      case AINPUT_EVENT_TYPE_MOTION: {
+        auto action = AMotionEvent_getAction(event);
+        auto flags = action & AMOTION_EVENT_ACTION_MASK;
+        switch (flags) {
+          case AMOTION_EVENT_ACTION_MOVE:
+          case AMOTION_EVENT_ACTION_DOWN:
+          case AMOTION_EVENT_ACTION_UP:
+            renderer->motionEvent(flags, AMotionEvent_getX(event, 0),
+                                  AMotionEvent_getY(event, 0));
+            break;
+          default:
+            break;
+        }
 
-    auto action = AMotionEvent_getAction(event);
-    auto flags = action & AMOTION_EVENT_ACTION_MASK;
-    switch (flags) {
-      case AMOTION_EVENT_ACTION_MOVE:
-      case AMOTION_EVENT_ACTION_DOWN:
-      case AMOTION_EVENT_ACTION_UP:
-        renderer->motionEvent(flags, AMotionEvent_getX(event, 0),
-                              AMotionEvent_getY(event, 0));
-        break;
+        return 1;
+      }
+
       default:
-        break;
+        return 0;
     }
 
-    return 1;
   }
 
   void handleCmd(int32_t cmd) override {
