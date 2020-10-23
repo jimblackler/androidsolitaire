@@ -2,7 +2,7 @@
 
 #include "GlUtils.h"
 #include "FileUtils.h"
-#include "game/GameController.h"
+#include "game/DragHandler.h"
 #include "game/GameState.h"
 
 #include "glm/glm.hpp"
