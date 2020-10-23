@@ -20,11 +20,18 @@ const int TEXTURE_HEIGHT = 900;
 const int CARD_WIDTH = 103;
 const int CARD_HEIGHT = 143;
 
-const int TARGET_WIDTH = 864;
+const int INDICATOR_WIDTH = 109;
+const int INDICATOR_HEIGHT = 149;
+const int INDICATOR_X = 1;
+const int INDICATOR_Y = 716;
+const int INDICATOR_OFFSET_X = -4;
+const int INDICATOR_OFFSET_Y = -3;
 
 const int BLANK_ROW = 4;
 const int CARDBACK_COLUMN = 0;
 const int PLACEHOLDER_COLUMN = 1;
+
+const int TARGET_WIDTH = 864;
 
 const int GEARS_LEFT = 112;
 const int GEARS_TOP = 717;
@@ -98,6 +105,13 @@ public:
       cardSprites[cardNumber] = newSprite(CARD_WIDTH, CARD_HEIGHT);
     }
 
+    selectionIndicator = newSprite(INDICATOR_WIDTH, INDICATOR_HEIGHT);
+    selectionIndicator->setPosition({INDICATOR_OFFSET_X, INDICATOR_OFFSET_Y, 0});
+    selectionIndicator->setUVs((float) INDICATOR_X / TEXTURE_WIDTH,
+                        (float) (INDICATOR_X + INDICATOR_WIDTH) / TEXTURE_WIDTH,
+                        (float) INDICATOR_Y / TEXTURE_HEIGHT,
+                        (float) (INDICATOR_Y + INDICATOR_HEIGHT) / TEXTURE_HEIGHT);
+
     gearsSprite = newSprite(GEARS_WIDTH, GEARS_HEIGHT);
     gearsSprite->setPosition({GEARS_X, GEARS_Y, 0});
     gearsSprite->setUVs((float) GEARS_LEFT / TEXTURE_WIDTH,
@@ -108,6 +122,7 @@ public:
 
 private:
   std::vector<Sprite *> cardSprites;
+  Sprite *selectionIndicator;
   std::list<int> order;
   std::set<int> draggable;
   float previousX;
@@ -134,6 +149,8 @@ private:
 
   ~LocalRenderer() {
     delete gearsSprite;
+
+    delete selectionIndicator;
 
     for (Sprite *sprite: cardSprites) {
       delete sprite;
@@ -195,6 +212,9 @@ private:
         sprite->draw(mvp, matrixId);
       }
     }
+
+    selectionIndicator->draw(mvp, matrixId);
+
     eglSwapBuffers(display, surface);
   }
 
