@@ -3,7 +3,7 @@
 #include "GlUtils.h"
 #include "FileUtils.h"
 #include "game/DragHandler.h"
-#include "game/GameState.h"
+#include "game/Rules.h"
 
 #include "glm/glm.hpp"
 #include "glm/gtx/transform.hpp"
@@ -11,6 +11,7 @@
 #include <GLES3/gl32.h>
 #include <android_native_app_glue.h>
 #include <cassert>
+#include <set>
 
 #include "Sprite.h"
 
@@ -284,6 +285,10 @@ private:
     this->dragHandler = dragHandler;
   }
 
+  void setIndicatedCard(int card) override {
+    indicatedCard = card;
+  }
+
   void _pointerDown(float x, float y) {
     for (auto it = order.rbegin(); it != order.rend(); it++) {
       int cardNumber = *it;
@@ -354,17 +359,11 @@ private:
     previousY = y;
   }
 
-  void keyEvent(int32_t action, int32_t keyCode) {
+  void keyEvent(int32_t action, int32_t keyCode) override {
     if (action != AKEY_EVENT_ACTION_DOWN) {
       return;
     }
-    switch (keyCode) {
-      case AKEYCODE_X:
-        indicatedCard++;
-        if (indicatedCard == NUMBER_CARDS) {
-          indicatedCard = 0;
-        }
-    }
+    dragHandler->indicatorMove(keyCode);
   }
 
   void javaCall(const char *method) const {

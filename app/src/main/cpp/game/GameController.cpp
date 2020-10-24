@@ -55,7 +55,6 @@ static long long getTimeNow() {
   return timeVal.tv_sec * 1000 + timeVal.tv_usec / 1000;
 }
 
-
 class LocalGameController : public GameController {
 public:
   Renderer *renderer;
@@ -66,6 +65,7 @@ public:
   int lastCardMoved = -1;
   GameState *gameState;
   long long int timeLastRendered = 0;
+  int indicatedColumn = 0;
 
   LocalGameController(Renderer *renderer, GameState *gameState) {
     this->renderer = renderer;
@@ -156,7 +156,6 @@ public:
   };
 
   void render() override {
-    const GameState *gameState = this->gameState;
     // Stop all animations immediately (old onArrive functions are invalid)
     for (const auto &pair : curves) {
       int cardNumber = pair.first;
@@ -240,7 +239,9 @@ public:
         tableauYSpacingFaceDown = availableForFaceDown / faceDownLength;
       }
 
+      int lastCard = -1;
       for (int cardNumber: tableauFaceDown) {
+        lastCard = cardNumber;
         _placeCard(cardNumber, TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
                    position, false, 0);
         renderer->faceDown(cardNumber);
@@ -248,10 +249,15 @@ public:
       }
 
       for (int cardNumber: tableauFaceUp) {
+        lastCard = cardNumber;
         _placeCard(cardNumber, TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
                    position, true, 0);
         renderer->faceUp(cardNumber);
         position += tableauYSpacingFaceUp;
+      }
+
+      if (indicatedColumn == tableauIdx && lastCard != -1) {
+        renderer->setIndicatedCard(lastCard);
       }
     }
   }
@@ -415,6 +421,19 @@ public:
         gameState->execute(*closestAction);
         //GameStore.store(gameState);
       }
+    }
+    render();
+  }
+
+  void indicatorMove(int32_t keyCode) override {
+    switch (keyCode) {
+      case AKEYCODE_DPAD_LEFT:
+        indicatedColumn--;
+        break;
+
+      case AKEYCODE_DPAD_RIGHT:
+        indicatedColumn++;
+        break;
     }
     render();
   }
