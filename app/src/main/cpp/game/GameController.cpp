@@ -65,6 +65,7 @@ public:
   int lastCardMoved = -1;
   GameState *gameState;
   long long int timeLastRendered = 0;
+  int indicatedRow = 0;
   int indicatedColumn = 0;
 
   LocalGameController(Renderer *renderer, GameState *gameState) {
@@ -168,20 +169,25 @@ public:
     auto &stock = gameState->getStock();
     auto stockLength = stock.size();
 
+    int lastCard = -1;
     for (int idx = 0; idx != stockLength; idx++) {
       int cardNumber = stock[idx];
+      lastCard = cardNumber;
       renderer->faceDown(cardNumber);
       _placeCard(cardNumber, STOCK_X, STOCK_Y, false, 0);
     }
-
+    if (indicatedRow == 0 && indicatedColumn == 0 && lastCard != -1) {
+      renderer->setIndicatedCard(lastCard);
+    }
     // Position waste cards.
     auto &waste = gameState->getWaste();
     int wasteLength = (int) waste.size();
     assert (wasteLength >= 0); // temp till bug is found
     assert (wasteLength < NUMBER_CARDS);  // temp till bug is found
+    lastCard = -1;
     for (int idx = 0; idx != wasteLength; idx++) {
       int cardNumber = waste[idx];
-
+      lastCard = cardNumber;
       renderer->faceUp(cardNumber);
       int staggerOrder = std::max(idx - wasteLength + CARDS_TO_DRAW, 0);
       int delay = staggerOrder * WASTE_DRAW_STAGGER * ANIMATION_TEST_SLOWDOWN;
@@ -193,6 +199,9 @@ public:
       _placeCard(cardNumber, WASTE_X + WASTE_X_SPACING * position, WASTE_Y,
                  idx == wasteLength - 1, delay);
     }
+    if (indicatedRow == 0 && indicatedColumn == 1 && lastCard != -1) {
+      renderer->setIndicatedCard(lastCard);
+    }
 
     // Position foundation cards.
     auto &foundations = gameState->getFoundations();
@@ -201,12 +210,17 @@ public:
       auto &foundation = foundations[foundationIdx];
       auto foundationLength = foundation.size();
 
+      lastCard = -1;
       for (int position = 0; position < foundationLength; position++) {
         int cardNumber = foundation[position];
+        lastCard = cardNumber;
         renderer->faceUp(cardNumber);
         _placeCard(cardNumber,
                    FOUNDATION_X + FOUNDATION_X_SPACING * foundationIdx,
                    FOUNDATION_Y, true, 0);
+      }
+      if (indicatedRow == 0 && indicatedColumn == 2 + foundationIdx && lastCard != -1) {
+        renderer->setIndicatedCard(lastCard);
       }
     }
 
@@ -239,7 +253,7 @@ public:
         tableauYSpacingFaceDown = availableForFaceDown / faceDownLength;
       }
 
-      int lastCard = -1;
+      lastCard = -1;
       for (int cardNumber: tableauFaceDown) {
         lastCard = cardNumber;
         _placeCard(cardNumber, TABLEAU_X + TABLEAU_X_SPACING * tableauIdx,
@@ -256,7 +270,7 @@ public:
         position += tableauYSpacingFaceUp;
       }
 
-      if (indicatedColumn == tableauIdx && lastCard != -1) {
+      if (indicatedRow == 1 && indicatedColumn == tableauIdx && lastCard != -1) {
         renderer->setIndicatedCard(lastCard);
       }
     }
@@ -428,11 +442,31 @@ public:
   void indicatorMove(int32_t keyCode) override {
     switch (keyCode) {
       case AKEYCODE_DPAD_LEFT:
+        if (indicatedColumn == 0) {
+          indicatedColumn = NUMBER_TABLEAUS;
+        }
         indicatedColumn--;
         break;
 
       case AKEYCODE_DPAD_RIGHT:
         indicatedColumn++;
+        if (indicatedColumn == NUMBER_TABLEAUS) {
+          indicatedColumn = 0;
+        }
+        break;
+
+      case AKEYCODE_DPAD_UP:
+        if (indicatedRow == 0) {
+          indicatedRow = 2;
+        }
+        indicatedRow--;
+        break;
+
+      case AKEYCODE_DPAD_DOWN:
+        indicatedRow++;
+        if (indicatedRow == 2) {
+          indicatedRow = 0;
+        }
         break;
     }
     render();
