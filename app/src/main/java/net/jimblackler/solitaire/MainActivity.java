@@ -55,7 +55,7 @@ public class MainActivity extends NativeActivity {
     super.onActivityResult(requestCode, resultCode, data);
     if (resultCode == RESULT_OK) {
       String action = data.getStringExtra("action");
-      if (action.equals("quit")) {
+      if ("quit".equals(action)) {
         finish();
       } else {
         action(action);
